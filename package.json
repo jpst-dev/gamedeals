@@ -1,0 +1,27 @@
+{
+  "name": "meu-site-jogos",
+  "type": "module",
+  "private": true,
+  "packageManager": "yarn@4.13.0",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@nuxt/ui": "^2.21.1",
+    "@pinia/nuxt": "^0.11.3",
+    "chart.js": "^4.5.1",
+    "nuxt": "^3.12.4",
+    "pinia": "^3.0.4",
+    "vue-chartjs": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "typescript": "^5.9.2",
+    "vue-tsc": "^3.2.6"
+  }
+}
