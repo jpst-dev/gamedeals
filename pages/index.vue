@@ -15,6 +15,16 @@
         >
           Filtros<span v-if="activeFilterCount > 0"> ({{ activeFilterCount }})</span>
         </UButton>
+        <UButton
+          class="hidden lg:inline-flex"
+          size="sm"
+          variant="outline"
+          icon="i-heroicons-adjustments-horizontal"
+          @click="showDesktopFilters = !showDesktopFilters"
+        >
+          {{ showDesktopFilters ? 'Ocultar filtros' : 'Mostrar filtros' }}
+          <span v-if="activeFilterCount > 0">({{ activeFilterCount }})</span>
+        </UButton>
         <label for="sort-by" class="text-sm text-gray-300">Sort by</label>
         <select
           id="sort-by"
@@ -179,8 +189,11 @@
       </Transition>
     </Teleport>
 
-    <div class="grid gap-6 lg:grid-cols-[300px_1fr]">
-      <aside class="hidden space-y-4 lg:sticky lg:top-24 lg:block lg:self-start">
+    <div class="grid gap-6" :class="showDesktopFilters ? 'lg:grid-cols-[300px_1fr]' : 'lg:grid-cols-1'">
+      <aside
+        class="hidden space-y-4 lg:sticky lg:top-24 lg:self-start"
+        :class="showDesktopFilters ? 'lg:block' : 'lg:hidden'"
+      >
         <div class="space-y-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-white">Filtros</h2>
@@ -310,7 +323,11 @@
           <p>{{ loadedGames.length }} jogos carregados</p>
         </div>
 
-        <div v-if="pending && loadedGames.length === 0" class="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div
+          v-if="pending && loadedGames.length === 0"
+          class="grid grid-cols-2 gap-4 md:grid-cols-2"
+          :class="showDesktopFilters ? 'xl:grid-cols-3 2xl:grid-cols-4' : 'xl:grid-cols-4 2xl:grid-cols-5'"
+        >
           <USkeleton v-for="index in 8" :key="index" class="h-56 rounded-xl" />
         </div>
 
@@ -318,7 +335,11 @@
           {{ errorMessage }}
         </div>
 
-        <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div
+          v-else
+          class="grid grid-cols-2 gap-4 md:grid-cols-2"
+          :class="showDesktopFilters ? 'xl:grid-cols-3 2xl:grid-cols-4' : 'xl:grid-cols-4 2xl:grid-cols-5'"
+        >
           <GameCard
             v-for="game in filteredGames"
             :key="game.id"
@@ -455,6 +476,7 @@ const loadedPages = ref(1)
 const hasMorePages = ref(false)
 const isLoadingMore = ref(false)
 const showBackToTop = ref(false)
+const showDesktopFilters = ref(false)
 const isMobileFiltersOpen = ref(false)
 const autoLoadTrigger = ref<HTMLElement | null>(null)
 const autoLoadedBatches = ref(0)
