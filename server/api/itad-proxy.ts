@@ -50,7 +50,7 @@ export default defineEventHandler(
     const sort = typeof body?.sort === 'string'
       ? body.sort
       : (typeof query.sort === 'string' ? query.sort : undefined)
-    const hasValidApiKey = Boolean(config.itadApiKey) && config.itadApiKey !== 'SUA_CHAVE_AQUI'
+    const hasValidApiKey = Boolean(config.itadApiKey)
 
     if (!operation) {
       return {
@@ -68,7 +68,7 @@ export default defineEventHandler(
 
       return {
         data: [],
-        warning: 'Use a valid ITAD key in runtime config.'
+        warning: 'Set ITAD_API_KEY in your environment variables.'
       }
     }
 
