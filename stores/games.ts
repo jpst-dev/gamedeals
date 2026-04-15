@@ -5,6 +5,8 @@ type PriceFilter = {
   max: number | null
 }
 
+const FAVORITES_STORAGE_KEY = 'gamedeals:favorites'
+
 export const useGamesStore = defineStore('games', () => {
   const favorites = ref<string[]>([])
   const priceFilter = ref<PriceFilter>({
@@ -33,6 +35,28 @@ export const useGamesStore = defineStore('games', () => {
     favorites.value.push(gameId)
   }
 
+  const hydrateFavorites = (): void => {
+    if (!import.meta.client) {
+      return
+    }
+
+    try {
+      const rawFavorites = window.localStorage.getItem(FAVORITES_STORAGE_KEY)
+      if (!rawFavorites) {
+        return
+      }
+
+      const parsed = JSON.parse(rawFavorites)
+      if (Array.isArray(parsed)) {
+        favorites.value = parsed
+          .map((entry) => String(entry))
+          .filter(Boolean)
+      }
+    } catch {
+      favorites.value = []
+    }
+  }
+
   const filteredResults = computed(() => {
     return searchResults.value.filter((game) => {
       const bestPrice = Math.min(...game.price.map((entry) => entry.amount))
@@ -41,6 +65,13 @@ export const useGamesStore = defineStore('games', () => {
       return minOk && maxOk
     })
   })
+
+  if (import.meta.client) {
+    hydrateFavorites()
+    watch(favorites, (nextFavorites) => {
+      window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(nextFavorites))
+    }, { deep: true })
+  }
 
   return {
     favorites,
