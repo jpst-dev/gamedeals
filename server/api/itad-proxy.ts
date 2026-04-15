@@ -1,4 +1,4 @@
-type ItadOperation = 'search' | 'info' | 'prices' | 'top'
+type ItadOperation = 'search' | 'info' | 'prices' | 'top' | 'steamMedia'
 
 type ItadProxyBody = {
   operation: ItadOperation
@@ -11,15 +11,19 @@ type ItadProxyBody = {
   limit?: number
   offset?: number
   sort?: string
+  appid?: number
 }
 
 const ITAD_BASE_URL = 'https://api.isthereanydeal.com'
+const STEAM_STORE_BASE_URL = 'https://store.steampowered.com'
+const STEAM_LANGUAGE = 'brazilian'
 const PROXY_CACHE_MAX_ENTRIES = 250
 const PROXY_CACHE_TTLS_MS: Record<ItadOperation, number> = {
   top: 60_000,
   search: 45_000,
   info: 300_000,
-  prices: 90_000
+  prices: 90_000,
+  steamMedia: 21_600_000
 }
 const proxyResponseCache = new Map<string, { expiresAt: number; data: unknown }>()
 
@@ -110,6 +114,9 @@ export default defineEventHandler(
     const sort = typeof body?.sort === 'string'
       ? body.sort
       : (typeof query.sort === 'string' ? query.sort : undefined)
+    const appid = typeof body?.appid === 'number'
+      ? body.appid
+      : (typeof query.appid === 'string' ? Number(query.appid) : undefined)
     const hasValidApiKey = Boolean(config.itadApiKey)
 
     if (!operation) {
@@ -117,6 +124,59 @@ export default defineEventHandler(
         data: [],
         warning: 'operation is required'
       }
+    }
+
+    if (operation === 'steamMedia') {
+      if (!Number.isFinite(appid) || (appid ?? 0) <= 0) {
+        return {
+          data: {
+            screenshots: [],
+            videos: []
+          },
+          warning: 'Valid appid is required for steamMedia operation.'
+        }
+      }
+
+      const normalizedAppid = Number(appid)
+      const cacheKey = createCacheKey('steamMedia', {
+        appid: normalizedAppid,
+        cc: 'br',
+        l: STEAM_LANGUAGE
+      })
+      const cachedData = readFromProxyCache(cacheKey)
+      if (cachedData) {
+        return { data: cachedData }
+      }
+
+      const steamUrl = new URL('/api/appdetails', STEAM_STORE_BASE_URL)
+      steamUrl.searchParams.set('appids', String(normalizedAppid))
+      steamUrl.searchParams.set('cc', 'br')
+      steamUrl.searchParams.set('l', STEAM_LANGUAGE)
+
+      const steamResponse = await $fetch<Record<string, unknown>>(steamUrl.toString())
+      const appNode = (steamResponse[String(normalizedAppid)] ?? {}) as Record<string, unknown>
+      const success = Boolean(appNode.success)
+      const dataNode = (appNode.data ?? {}) as Record<string, unknown>
+      const screenshotsNode = Array.isArray(dataNode.screenshots) ? dataNode.screenshots : []
+      const moviesNode = Array.isArray(dataNode.movies) ? dataNode.movies : []
+
+      const shortDescription = typeof dataNode.short_description === 'string'
+        ? dataNode.short_description
+        : ''
+      const normalizedPayload = success
+        ? {
+            screenshots: screenshotsNode,
+            videos: moviesNode,
+            shortDescription
+          }
+        : {
+            screenshots: [],
+            videos: [],
+            shortDescription: ''
+          }
+
+      writeToProxyCache(cacheKey, PROXY_CACHE_TTLS_MS.steamMedia, normalizedPayload)
+      return { data: normalizedPayload }
     }
 
     if (!hasValidApiKey) {
