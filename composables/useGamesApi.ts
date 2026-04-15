@@ -43,6 +43,20 @@ export type GameInfo = {
   gameUrl?: string
 }
 
+export type GameMedia = {
+  shortDescription?: string
+  screenshots: string[]
+  videos: Array<{
+    id: number
+    name: string
+    thumbnail: string
+    webm?: string
+    mp4?: string
+    hls?: string
+    dash?: string
+  }>
+}
+
 type ProxyResponse<T> = {
   data: T
   warning?: string
@@ -454,12 +468,63 @@ export const useGamesApi = () => {
     })
   }
 
+  const getGameMedia = async (appid: number): Promise<GameMedia> => {
+    if (!Number.isFinite(appid) || appid <= 0) {
+      return {
+        shortDescription: '',
+        screenshots: [],
+        videos: []
+      }
+    }
+
+    const response = await $fetch<ProxyResponse<Record<string, unknown>>>('/api/itad-proxy', {
+      method: 'POST',
+      body: {
+        operation: 'steamMedia',
+        appid
+      }
+    })
+
+    const dataNode = response.data ?? {}
+    const screenshotsNode = Array.isArray(dataNode.screenshots) ? dataNode.screenshots : []
+    const videosNode = Array.isArray(dataNode.videos) ? dataNode.videos : []
+    const shortDescription = typeof dataNode.shortDescription === 'string'
+      ? dataNode.shortDescription
+      : ''
+
+    return {
+      shortDescription,
+      screenshots: screenshotsNode
+        .map((item) => String((item as { path_full?: unknown }).path_full ?? ''))
+        .filter(Boolean),
+      videos: videosNode
+        .map((item) => {
+          const row = item as Record<string, unknown>
+          const webmNode = (row.webm ?? {}) as Record<string, unknown>
+          const mp4Node = (row.mp4 ?? {}) as Record<string, unknown>
+          const hls = typeof row.hls_h264 === 'string' ? row.hls_h264 : undefined
+          const dash = typeof row.dash_h264 === 'string' ? row.dash_h264 : undefined
+          return {
+            id: Number(row.id ?? 0),
+            name: String(row.name ?? 'Trailer'),
+            thumbnail: String(row.thumbnail ?? ''),
+            webm: typeof webmNode.max === 'string' ? webmNode.max : undefined,
+            mp4: typeof mp4Node.max === 'string' ? mp4Node.max : undefined,
+            hls,
+            dash
+          }
+        })
+        .filter((video) => Boolean(video.webm || video.mp4 || video.hls || video.dash))
+    }
+  }
+
   return {
     searchGames,
     searchGameSuggestions,
     getTopGames,
     getGameIdBySlug,
     getGameInfo,
-    getPrices
+    getPrices,
+    getGameMedia
   }
 }
