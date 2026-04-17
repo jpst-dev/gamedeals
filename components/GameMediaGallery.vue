@@ -2,7 +2,7 @@
   <div v-if="props.mediaItems.length > 0" :class="props.embedded ? 'min-w-0 space-y-2' : 'min-w-0 space-y-3'">
     <h2 v-if="!props.embedded" class="text-xl font-semibold text-white">Midia do jogo</h2>
     <div :class="props.embedded
-      ? 'min-w-0 space-y-3 rounded-xl border border-gray-800 bg-gray-900 p-2'
+      ? 'min-w-0 space-y-3 bg-transparent p-0'
       : 'min-w-0 space-y-3 rounded-xl border border-gray-800 bg-gray-900 p-4'"
     >
       <ClientOnly>
@@ -65,7 +65,7 @@
             </template>
           </SwiperSlide>
 
-          <div class="absolute bottom-3 right-3 z-20">
+          <div v-if="props.mediaItems[activeIndex]?.kind !== 'video'" class="absolute bottom-3 right-3 z-20">
             <button
               type="button"
               class="rounded p-1.5 text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"

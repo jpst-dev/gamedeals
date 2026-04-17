@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
+  <div class="space-y-4 rounded-xl border border-white/10 bg-gray-900/45 p-4 backdrop-blur-md">
     <UTable
       :rows="paginatedRows"
       :columns="columns"
@@ -44,7 +44,7 @@
       </template>
     </UTable>
 
-    <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-gray-800 pt-3">
+    <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-white/10 pt-3">
       <p class="text-xs text-gray-400">
         Mostrando {{ pageStart + 1 }}-{{ Math.min(pageStart + perPage, normalizedRows.length) }} de {{ normalizedRows.length }} ofertas
       </p>

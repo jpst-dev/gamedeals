@@ -1,7 +1,7 @@
 <template>
   <NuxtLayout>
     <div class="flex min-h-screen flex-col bg-gray-950 text-gray-100">
-      <header class="relative z-40 border-b border-gray-800 bg-gray-900/80 backdrop-blur">
+      <header class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-gray-950/55 backdrop-blur-md">
         <UContainer class="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
           <NuxtLink
             to="/"
@@ -67,7 +67,7 @@
         </UContainer>
       </header>
 
-      <main class="flex-1 py-6">
+      <main class="flex-1 pb-6 pt-28 sm:pt-24">
         <UContainer>
           <NuxtPage />
         </UContainer>
