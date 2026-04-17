@@ -25,18 +25,6 @@
           {{ showDesktopFilters ? 'Ocultar filtros' : 'Mostrar filtros' }}
           <span v-if="activeFilterCount > 0">({{ activeFilterCount }})</span>
         </UButton>
-        <label for="sort-by" class="text-sm text-gray-300">Sort by</label>
-        <select
-          id="sort-by"
-          :value="currentSort"
-          class="rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-primary-400 focus:outline-none"
-          aria-label="Sort game list"
-          @change="changeSort(($event.target as HTMLSelectElement).value)"
-        >
-          <option v-for="option in sortOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
         <UIcon v-if="pending" name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-primary-400" />
       </div>
     </div>
@@ -318,9 +306,58 @@
       </aside>
 
       <div class="space-y-4">
-        <div class="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900/70 px-3 py-2 text-xs text-gray-300">
-          <p>{{ filteredGames.length }} resultados filtrados</p>
-          <p>{{ loadedGames.length }} jogos carregados</p>
+        <div class="rounded-lg border border-gray-800 bg-gray-900/70 px-3 py-2 text-xs text-gray-300">
+          <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex flex-wrap items-center gap-2">
+            <label for="quick-filter-platform" class="text-xs text-gray-400">Plataforma</label>
+            <select
+              id="quick-filter-platform"
+              v-model="filters.platform"
+              class="rounded-md border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-100 focus:border-primary-400 focus:outline-none"
+              aria-label="Quick platform filter"
+            >
+              <option value="">Todas</option>
+              <option value="windows">Windows</option>
+              <option value="mac">Mac</option>
+              <option value="linux">Linux</option>
+            </select>
+
+            <label for="quick-filter-activation" class="text-xs text-gray-400">Ativacao</label>
+            <select
+              id="quick-filter-activation"
+              v-model="filters.activation"
+              class="rounded-md border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-100 focus:border-primary-400 focus:outline-none"
+              aria-label="Quick activation filter"
+            >
+              <option value="">Todas</option>
+              <option value="steam">Steam</option>
+              <option value="epic">Epic</option>
+              <option value="drm free">DRM Free</option>
+            </select>
+
+            </div>
+
+            <div class="flex items-center gap-2 lg:justify-end">
+              <label for="quick-sort-by" class="text-xs text-gray-400">Sort by</label>
+              <select
+                id="quick-sort-by"
+                :value="currentSort"
+                class="rounded-md border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-100 focus:border-primary-400 focus:outline-none"
+                aria-label="Sort game list"
+                @change="changeSort(($event.target as HTMLSelectElement).value)"
+              >
+                <option v-for="option in sortOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-2 flex items-center gap-3 border-t border-gray-800 pt-2 text-[11px] text-gray-400">
+            <p>{{ filteredGames.length }} resultados filtrados</p>
+            <span class="h-3 w-px bg-gray-700" aria-hidden="true" />
+            <p>{{ loadedGames.length }} jogos carregados</p>
+          </div>
         </div>
 
         <div

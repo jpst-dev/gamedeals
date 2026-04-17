@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-xl border border-gray-800 bg-gray-900 p-4">
+  <div class="rounded-xl border border-white/10 bg-gray-900/45 p-4 backdrop-blur-md">
     <ClientOnly>
       <div class="h-48">
         <Line :data="chartData" :options="chartOptions" />

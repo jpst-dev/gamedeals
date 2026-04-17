@@ -1,5 +1,5 @@
 <template>
-  <section class="space-y-8">
+  <section class="relative isolate space-y-8">
     <div v-if="pending" class="space-y-4">
       <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-primary-400" />
       <USkeleton class="h-60 rounded-xl" />
@@ -10,87 +10,96 @@
     </div>
 
     <template v-else>
-      <div class="space-y-3">
-        <h1 class="text-3xl font-bold text-white">{{ gameInfo?.title }}</h1>
-        <div class="grid gap-4 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
-          <GameMediaGallery
-            class="min-w-0"
-            :media-items="mediaItems"
-            :fallback-cover="fallbackCover"
-            :game-title="gameInfo?.title || 'jogo'"
-            embedded
-          />
-
-          <aside class="min-w-0 space-y-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
-            <img
-              :src="sidebarHeaderImage"
-              :alt="`Header image for ${gameInfo?.title ?? 'game'}`"
-              class="h-auto w-full rounded-lg"
-            >
-
-            <p class="text-sm text-gray-300">
-              {{ gameDescription }}
-            </p>
-
-            <div class="space-y-2 text-sm">
-              <div class="grid grid-cols-[120px_1fr] gap-2">
-                <p class="text-gray-500">Ativacao:</p>
-                <p class="font-medium text-gray-100">{{ topOffer?.activation || 'DRM nao informado' }}</p>
-              </div>
-              <div class="grid grid-cols-[120px_1fr] gap-2">
-                <p class="text-gray-500">Regiao:</p>
-                <p class="font-medium text-gray-100">{{ topOffer?.region || 'Global' }}</p>
-              </div>
-              <div class="grid grid-cols-[120px_1fr] gap-2">
-                <p class="text-gray-500">Melhor preco:</p>
-                <p class="font-semibold text-green-300">{{ formatCurrency(topOffer?.price ?? 0) }}</p>
-              </div>
-              <div class="grid grid-cols-[120px_1fr] gap-2">
-                <p class="text-gray-500">Lancamento:</p>
-                <p class="font-medium text-gray-100">{{ releaseDateText }}</p>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-              <UBadge v-for="tag in topTags" :key="tag" color="gray" variant="soft">{{ tag }}</UBadge>
-            </div>
-          </aside>
-        </div>
+      <div
+        class="pointer-events-none absolute left-1/2 -top-28 z-0 h-[calc(100%+7rem)] w-screen -translate-x-1/2 overflow-hidden sm:-top-24 sm:h-[calc(100%+6rem)]"
+      >
+        <div class="absolute inset-0 scale-105 bg-cover bg-center opacity-60 blur-md" :style="heroBackdropStyle" />
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-900/10 via-gray-950/70 to-gray-950" />
       </div>
 
-      <div class="space-y-3">
-        <h2 class="text-xl font-semibold text-white">Tabela de precos</h2>
-        <PriceTable :rows="priceRows" />
-      </div>
-
-      <div class="grid gap-6 lg:grid-cols-2">
+      <div class="relative z-10 space-y-8">
         <div class="space-y-3">
-          <h2 class="text-xl font-semibold text-white">Historico de precos</h2>
-          <PriceHistoryChart
-            :points="priceHistoryPoints"
-            :comparison-price="topOffer?.regularPrice"
-            comparison-label="preco original"
-          />
-        </div>
+          <h1 class="text-3xl font-bold text-white">{{ gameInfo?.title }}</h1>
+          <div class="grid gap-4 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
+            <GameMediaGallery
+              class="min-w-0"
+              :media-items="mediaItems"
+              :fallback-cover="fallbackCover"
+              :game-title="gameInfo?.title || 'jogo'"
+              embedded
+            />
 
-        <div class="space-y-3">
-          <h2 class="text-xl font-semibold text-white">Avaliacoes e metadados</h2>
-          <div class="space-y-3 rounded-xl border border-gray-800 bg-gray-900 p-4">
-            <div v-if="gameInfo?.reviewStats.length" class="space-y-2">
-              <div
-                v-for="review in gameInfo.reviewStats.slice(0, 4)"
-                :key="`${review.source}-${review.score}`"
-                class="flex items-center justify-between rounded-md bg-gray-950 px-3 py-2 text-xs"
+            <aside class="min-w-0 space-y-4 rounded-xl border border-white/10 bg-gray-900/45 p-4 backdrop-blur-md">
+              <img
+                :src="sidebarHeaderImage"
+                :alt="`Header image for ${gameInfo?.title ?? 'game'}`"
+                class="h-auto w-full rounded-lg"
               >
-                <span class="text-gray-300">{{ review.source }}</span>
-                <span class="font-semibold text-gray-100">{{ review.score }} ({{ review.count }})</span>
-              </div>
-            </div>
-            <p v-else class="text-sm text-gray-400">Sem reviews agregados disponiveis no momento.</p>
 
-            <div class="space-y-1 text-sm text-gray-300">
-              <p><span class="text-gray-500">Developers:</span> {{ gameInfo?.developers.join(', ') || 'N/A' }}</p>
-              <p><span class="text-gray-500">Publishers:</span> {{ gameInfo?.publishers.join(', ') || 'N/A' }}</p>
+              <p class="text-sm text-gray-300">
+                {{ gameDescription }}
+              </p>
+
+              <div class="space-y-2 text-sm">
+                <div class="grid grid-cols-[120px_1fr] gap-2">
+                  <p class="text-gray-500">Ativacao:</p>
+                  <p class="font-medium text-gray-100">{{ topOffer?.activation || 'DRM nao informado' }}</p>
+                </div>
+                <div class="grid grid-cols-[120px_1fr] gap-2">
+                  <p class="text-gray-500">Regiao:</p>
+                  <p class="font-medium text-gray-100">{{ topOffer?.region || 'Global' }}</p>
+                </div>
+                <div class="grid grid-cols-[120px_1fr] gap-2">
+                  <p class="text-gray-500">Melhor preco:</p>
+                  <p class="font-semibold text-green-300">{{ formatCurrency(topOffer?.price ?? 0) }}</p>
+                </div>
+                <div class="grid grid-cols-[120px_1fr] gap-2">
+                  <p class="text-gray-500">Lancamento:</p>
+                  <p class="font-medium text-gray-100">{{ releaseDateText }}</p>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <UBadge v-for="tag in topTags" :key="tag" color="gray" variant="soft">{{ tag }}</UBadge>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h2 class="text-xl font-semibold text-white">Tabela de precos</h2>
+          <PriceTable :rows="priceRows" />
+        </div>
+
+        <div class="grid gap-6 lg:grid-cols-2">
+          <div class="space-y-3">
+            <h2 class="text-xl font-semibold text-white">Historico de precos</h2>
+            <PriceHistoryChart
+              :points="priceHistoryPoints"
+              :comparison-price="topOffer?.regularPrice"
+              comparison-label="preco original"
+            />
+          </div>
+
+          <div class="space-y-3">
+            <h2 class="text-xl font-semibold text-white">Avaliacoes e metadados</h2>
+            <div class="space-y-3 rounded-xl border border-white/10 bg-gray-900/45 p-4 backdrop-blur-md">
+              <div v-if="gameInfo?.reviewStats.length" class="space-y-2">
+                <div
+                  v-for="review in gameInfo.reviewStats.slice(0, 4)"
+                  :key="`${review.source}-${review.score}`"
+                  class="flex items-center justify-between rounded-md bg-gray-950/50 px-3 py-2 text-xs"
+                >
+                  <span class="text-gray-300">{{ review.source }}</span>
+                  <span class="font-semibold text-gray-100">{{ review.score }} ({{ review.count }})</span>
+                </div>
+              </div>
+              <p v-else class="text-sm text-gray-400">Sem reviews agregados disponiveis no momento.</p>
+
+              <div class="space-y-1 text-sm text-gray-300">
+                <p><span class="text-gray-500">Developers:</span> {{ gameInfo?.developers.join(', ') || 'N/A' }}</p>
+                <p><span class="text-gray-500">Publishers:</span> {{ gameInfo?.publishers.join(', ') || 'N/A' }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -176,6 +185,19 @@ const sidebarHeaderImage = computed(() => {
 
   return gameInfo.value?.image || fallbackCover
 })
+
+const heroBackdropImage = computed(() => {
+  const firstScreenshot = gameMedia.value.screenshots[0]
+  if (firstScreenshot) {
+    return firstScreenshot
+  }
+
+  return sidebarHeaderImage.value
+})
+
+const heroBackdropStyle = computed(() => ({
+  backgroundImage: `url('${heroBackdropImage.value}')`
+}))
 
 const priceHistoryPoints = computed(() => {
   const current = topOffer.value?.price ?? 0
