@@ -190,3 +190,45 @@ describe('composables/useGamesApi', () => {
     ])
   })
 })
+
+describe('normalizeDealGame', () => {
+  it('normalizes deal images and history-low flag', async () => {
+    const { normalizeDealGame } = await loadModule()
+    const game = normalizeDealGame({
+      id: 'g',
+      title: 'G',
+      type: 'game',
+      assets: { banner300: 'b300', boxart: 'box', banner600: '' },
+      deal: { price: { amount: 10 }, flag: 'H' }
+    }, 0)
+    expect(game?.images).toEqual(['box', 'b300'])
+    expect(game?.image).toBe('box')
+    expect(game?.historyLowFlag).toBe('H')
+  })
+
+  it('drops deals without a game type', async () => {
+    const { normalizeDealGame } = await loadModule()
+    expect(normalizeDealGame({ id: 'x', title: 'X', type: null, deal: {} }, 0)).toBeNull()
+  })
+})
+
+describe('getHome', () => {
+  it('normalizes the home payload', async () => {
+    const fetchMock = vi.fn(async () => ({
+      hero: [{ appid: 1086940, deal: { id: 'h', title: 'BG3', type: 'game', deal: { price: { amount: 139.99 } } } }],
+      shelves: [{
+        key: 'em-alta',
+        title: 'Em alta',
+        href: '/ofertas',
+        items: [{ id: 'a', title: 'A', type: 'game', deal: {} }, { id: 'p', type: 'package' }]
+      }]
+    }))
+    setupComposableGlobals(fetchMock)
+
+    const home = await (await loadApi()).getHome()
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/home')
+    expect(home.hero[0]).toMatchObject({ id: 'h', appid: 1086940, price: [{ amount: 139.99 }] })
+    expect(home.shelves[0]!.games.map((game) => game.id)).toEqual(['a'])
+  })
+})

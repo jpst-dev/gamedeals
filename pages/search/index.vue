@@ -43,7 +43,7 @@
         :key="game.id"
         :game="game"
         :is-favorite="gamesStore.favorites.includes(game.id)"
-        @toggle-favorite="gamesStore.toggleFavorite"
+        @toggle-favorite="(game) => gamesStore.toggleFavorite(game.id)"
       />
     </div>
   </section>
