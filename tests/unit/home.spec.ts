@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { DEFAULT_CATALOG_STATE, catalogStateToDealParams } from '../../utils/catalog'
+import { DEFAULT_CATALOG_STATE, catalogStateToDealParams } from '../../app/utils/catalog'
 
 const globalScope = globalThis as Record<string, unknown>
 

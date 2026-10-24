@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { buildFavoriteCards, migrateLegacyIds, parseStoredFavorites, toggleFavoriteEntry, type FavoriteGame } from '../../utils/favorites'
+import { buildFavoriteCards, migrateLegacyIds, parseStoredFavorites, toggleFavoriteEntry, type FavoriteGame } from '../../app/utils/favorites'
 
 const fav = (id: string): FavoriteGame => ({ id, slug: id, title: id.toUpperCase(), image: '', addedAt: '2026-10-24T00:00:00.000Z' })
 const NOW = new Date('2026-10-24T12:00:00.000Z')
