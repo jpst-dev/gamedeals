@@ -31,3 +31,6 @@ logs
 !.yarn/versions
 # Brainstorm mockups
 .superpowers/
+
+# Vercel CLI
+.vercel
