@@ -243,3 +243,20 @@ describe('normalizeDealGame types', () => {
     expect(normalizeDealGame({ id: 'p', title: 'P', type: 'package', deal: {} }, 0)).toBeNull()
   })
 })
+
+describe('getPrices shop details', () => {
+  it('keeps the shop id and voucher of each deal', async () => {
+    const fetchMock = vi.fn(async () => [{
+      deals: [
+        { shop: { id: 61, name: 'Steam' }, price: { amount: 10 }, url: 'https://s', voucher: 'GAMES10' },
+        { shop: { id: 35, name: 'GOG' }, price: { amount: 12 }, url: 'https://g', voucher: null }
+      ]
+    }])
+    setupComposableGlobals(fetchMock)
+
+    const api = await loadApi()
+    const rows = await api.getPrices('game-1')
+
+    expect(rows.map((row) => [row.shopId, row.voucher])).toEqual([[61, 'GAMES10'], [35, undefined]])
+  })
+})

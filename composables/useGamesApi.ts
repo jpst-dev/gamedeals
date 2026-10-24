@@ -22,6 +22,7 @@ export type Game = {
 
 export type PriceRow = {
   store: string
+  shopId?: number
   price: number
   regularPrice?: number
   discount: number
@@ -31,6 +32,7 @@ export type PriceRow = {
   storeLow?: number
   updatedAt?: string
   link: string
+  voucher?: string
 }
 
 export type GameInfo = {
@@ -451,6 +453,7 @@ export const useGamesApi = () => {
 
       return {
         store: String(shop.name ?? 'Loja desconhecida'),
+        shopId: Number.isInteger(shop.id) ? Number(shop.id) : undefined,
         price: Number(price.amount ?? 0),
         regularPrice: Number(regular.amount ?? 0),
         discount: Number(deal.cut ?? 0),
@@ -459,7 +462,8 @@ export const useGamesApi = () => {
         historyLow: Number(historyLow.amount ?? 0),
         storeLow: Number(storeLow.amount ?? 0),
         updatedAt: typeof deal.timestamp === 'string' ? deal.timestamp : undefined,
-        link: String(deal.url ?? '#')
+        link: String(deal.url ?? '#'),
+        voucher: typeof deal.voucher === 'string' && deal.voucher ? deal.voucher : undefined
       }
     })
   }

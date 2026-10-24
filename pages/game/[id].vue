@@ -40,25 +40,9 @@
                 {{ gameDescription }}
               </p>
 
+              <GameBuyBox :offers="offers" />
+
               <div class="space-y-2 text-sm">
-                <div class="grid grid-cols-[120px_1fr] gap-2">
-                  <p class="text-gray-500">Ativação:</p>
-                  <p class="font-medium text-gray-100">{{ topOffer?.activation || 'DRM não informado' }}</p>
-                </div>
-                <div class="grid grid-cols-[120px_1fr] gap-2">
-                  <p class="text-gray-500">Melhor preço:</p>
-                  <p class="font-semibold text-green-300">
-                    {{ topOffer ? formatCurrency(topOffer.price) : 'Sem ofertas' }}
-                    <span v-if="topOffer" class="text-xs font-normal text-gray-400">em {{ topOffer.store }}</span>
-                  </p>
-                </div>
-                <div v-if="historyLowPrice" class="grid grid-cols-[120px_1fr] gap-2">
-                  <p class="text-gray-500">Mínima histórica:</p>
-                  <p class="font-medium text-gray-100">
-                    {{ formatCurrency(historyLowPrice) }}
-                    <UBadge v-if="isAtHistoryLow" color="green" variant="soft" size="xs">menor preço já visto</UBadge>
-                  </p>
-                </div>
                 <div class="grid grid-cols-[120px_1fr] gap-2">
                   <p class="text-gray-500">Lançamento:</p>
                   <p class="font-medium text-gray-100">{{ releaseDateText }}</p>
@@ -72,13 +56,10 @@
           </div>
         </div>
 
-        <div class="space-y-3">
-          <h2 class="text-xl font-semibold text-white">Tabela de preços</h2>
-          <PriceTable :rows="priceRows" />
-        </div>
+        <GameShopOfferList :offers="offers" />
 
         <div class="grid gap-6 lg:grid-cols-2">
-          <div class="space-y-3">
+          <div id="historico" class="scroll-mt-28 space-y-3">
             <h2 class="text-xl font-semibold text-white">Histórico de preços</h2>
             <PriceHistoryChart
               :history="priceHistory"
@@ -116,6 +97,7 @@
 
 <script setup lang="ts">
 import type { GameInfo, GameMedia, PriceHistoryPoint, PriceRow } from '~/composables/useGamesApi'
+import { rankOffers } from '~/utils/offers'
 
 const route = useRoute()
 const toast = useToast()
@@ -164,18 +146,8 @@ const gameInfo = computed(() => gamePayload.value?.gameInfo)
 const priceRows = computed(() => gamePayload.value?.prices ?? [])
 const priceHistory = computed(() => gamePayload.value?.priceHistory ?? [])
 const gameMedia = computed<GameMedia>(() => gamePayload.value?.gameMedia ?? { shortDescription: '', screenshots: [], videos: [] })
-const topOffer = computed(() => {
-  return priceRows.value.reduce<PriceRow | undefined>((best, row) => {
-    return !best || row.price < best.price ? row : best
-  }, undefined)
-})
-const historyLowPrice = computed(() => {
-  const lows = priceRows.value.map((row) => row.historyLow ?? 0).filter((value) => value > 0)
-  return lows.length > 0 ? Math.min(...lows) : 0
-})
-const isAtHistoryLow = computed(() => {
-  return Boolean(topOffer.value && historyLowPrice.value > 0 && topOffer.value.price <= historyLowPrice.value)
-})
+const offers = computed(() => rankOffers(priceRows.value))
+const topOffer = computed(() => offers.value[0])
 const topTags = computed(() => gameInfo.value?.tags.slice(0, 6) ?? [])
 const releaseDateText = computed(() => {
   if (!gameInfo.value?.releaseDate) {
@@ -265,13 +237,6 @@ const mediaItems = computed<MediaItem[]>(() => {
 const errorMessage = computed(() => {
   return error.value ? 'Não foi possível carregar os dados deste jogo.' : ''
 })
-
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value || 0)
-}
 
 useHead({
   title: computed(() => `${gameInfo.value?.title ?? 'Detalhe do jogo'} | ${appName.value}`),
