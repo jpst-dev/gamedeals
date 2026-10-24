@@ -29,3 +29,5 @@ logs
 !.yarn/patches
 !.yarn/sdks
 !.yarn/versions
+# Brainstorm mockups
+.superpowers/
