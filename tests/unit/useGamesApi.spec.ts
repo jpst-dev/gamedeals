@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { DEFAULT_CATALOG_STATE } from '../../utils/catalog'
 
 type StateRef<T> = { value: T }
 
@@ -93,7 +94,7 @@ describe('composables/useGamesApi', () => {
     await expect(api.getGameIdBySlug('missing-game')).rejects.toThrow('Game not found for this slug.')
   })
 
-  it('caches top games by sort, limit, page and server filters', async () => {
+  it('caches deal pages by catalog state and offset', async () => {
     const fetchMock = vi.fn(async () => ({
       list: [
         {
@@ -119,13 +120,15 @@ describe('composables/useGamesApi', () => {
     setupComposableGlobals(fetchMock)
 
     const api = await loadApi()
-    const firstCall = await api.getTopGames(20, '-hot', 1)
-    const secondCall = await api.getTopGames(20, '-hot', 1)
-    await api.getTopGames(20, '-hot', 1, { shops: [61], minCut: 50 })
+    const firstCall = await api.getDealsPage(DEFAULT_CATALOG_STATE, 0)
+    const secondCall = await api.getDealsPage(DEFAULT_CATALOG_STATE, 0)
+    expect(fetchMock).toHaveBeenCalledWith('/api/deals', { query: { sort: '-hot', limit: 20, offset: 0 } })
+
+    await api.getDealsPage({ ...DEFAULT_CATALOG_STATE, lojas: [61], desconto: 50 }, 20)
 
     expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock).toHaveBeenLastCalledWith('/api/deals', {
-      query: { limit: 20, offset: 0, sort: '-hot', shops: '61', minCut: 50 }
+      query: { sort: '-hot', shops: '61', minCut: 50, limit: 20, offset: 20 }
     })
     expect(firstCall.games.map((game) => game.slug)).toEqual(['test-game'])
     expect(secondCall.games).toHaveLength(1)
@@ -138,7 +141,7 @@ describe('composables/useGamesApi', () => {
     setupComposableGlobals(fetchMock)
 
     const api = await loadApi()
-    const result = await api.getTopGames(20, '-hot', 1)
+    const result = await api.getDealsPage(DEFAULT_CATALOG_STATE, 0)
 
     expect(result.games.map((game) => game.title)).toEqual(['Bundle of Joy'])
   })
@@ -188,5 +191,83 @@ describe('composables/useGamesApi', () => {
       { timestamp: '2026-03-01T00:00:00Z', price: 80, shop: 'GOG' },
       { timestamp: '2026-04-01T00:00:00Z', price: 100, shop: 'Steam' }
     ])
+  })
+})
+
+describe('normalizeDealGame', () => {
+  it('normalizes deal images and history-low flag', async () => {
+    const { normalizeDealGame } = await loadModule()
+    const game = normalizeDealGame({
+      id: 'g',
+      title: 'G',
+      type: 'game',
+      assets: { banner300: 'b300', boxart: 'box', banner600: '' },
+      deal: { price: { amount: 10 }, flag: 'H' }
+    }, 0)
+    expect(game?.images).toEqual(['box', 'b300'])
+    expect(game?.image).toBe('box')
+    expect(game?.historyLowFlag).toBe('H')
+  })
+
+  it('drops deals without a game type', async () => {
+    const { normalizeDealGame } = await loadModule()
+    expect(normalizeDealGame({ id: 'x', title: 'X', type: null, deal: {} }, 0)).toBeNull()
+  })
+})
+
+describe('getHome', () => {
+  it('normalizes the home payload', async () => {
+    const fetchMock = vi.fn(async () => ({
+      hero: [{ appid: 1086940, deal: { id: 'h', title: 'BG3', type: 'game', deal: { price: { amount: 139.99 } } } }],
+      shelves: [{
+        key: 'em-alta',
+        title: 'Em alta',
+        href: '/ofertas',
+        items: [{ id: 'a', title: 'A', type: 'game', deal: {} }, { id: 'p', type: 'package' }]
+      }]
+    }))
+    setupComposableGlobals(fetchMock)
+
+    const home = await (await loadApi()).getHome()
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/home')
+    expect(home.hero[0]).toMatchObject({ id: 'h', appid: 1086940, price: [{ amount: 139.99 }] })
+    expect(home.shelves[0]!.games.map((game) => game.id)).toEqual(['a'])
+  })
+})
+
+describe('normalizeDealGame types', () => {
+  it('keeps DLC deals so the DLC catalog filter has results', async () => {
+    const { normalizeDealGame } = await loadModule()
+    expect(normalizeDealGame({ id: 'd', title: 'D', type: 'dlc', deal: {} }, 0)?.id).toBe('d')
+    expect(normalizeDealGame({ id: 'p', title: 'P', type: 'package', deal: {} }, 0)).toBeNull()
+  })
+})
+
+describe('getPrices shop details', () => {
+  it('keeps the shop id and voucher of each deal', async () => {
+    const fetchMock = vi.fn(async () => [{
+      deals: [
+        { shop: { id: 61, name: 'Steam' }, price: { amount: 10 }, url: 'https://s', voucher: 'GAMES10' },
+        { shop: { id: 35, name: 'GOG' }, price: { amount: 12 }, url: 'https://g', voucher: null }
+      ]
+    }])
+    setupComposableGlobals(fetchMock)
+
+    const api = await loadApi()
+    const rows = await api.getPrices('game-1')
+
+    expect(rows.map((row) => [row.shopId, row.voucher])).toEqual([[61, 'GAMES10'], [35, undefined]])
+  })
+})
+
+describe('getGameInfo slug', () => {
+  it('keeps the ITAD slug so links resolve exactly', async () => {
+    const fetchMock = vi.fn(async () => ({ id: 'g-1', slug: 'baldurs-gate-3', title: "Baldur's Gate 3", assets: {} }))
+    setupComposableGlobals(fetchMock)
+
+    const api = await loadApi()
+
+    expect((await api.getGameInfo('g-1')).slug).toBe('baldurs-gate-3')
   })
 })

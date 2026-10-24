@@ -42,8 +42,8 @@
         v-for="game in gamesStore.filteredResults"
         :key="game.id"
         :game="game"
-        :is-favorite="gamesStore.favorites.includes(game.id)"
-        @toggle-favorite="gamesStore.toggleFavorite"
+        :is-favorite="gamesStore.isFavorite(game.id)"
+        @toggle-favorite="toggleFavorite"
       />
     </div>
   </section>
@@ -53,6 +53,7 @@
 const route = useRoute()
 const toast = useToast()
 const gamesStore = useGamesStore()
+const toggleFavorite = useFavoriteToggle()
 const { searchGames } = useGamesApi()
 const runtimeConfig = useRuntimeConfig()
 const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
@@ -69,6 +70,7 @@ useHead({
   title: computed(() => `Busca por ${queryTerm.value || 'jogos'} | ${appName.value}`),
   meta: [
     { name: 'description', content: 'Busque jogos para PC e compare preços por loja.' },
+    { name: 'robots', content: 'noindex, follow' },
     { property: 'og:title', content: computed(() => `${appName.value} | Busca de jogos`) }
   ]
 })

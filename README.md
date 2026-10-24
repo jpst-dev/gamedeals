@@ -4,12 +4,14 @@ Comparador de ofertas de jogos para PC, com dados da [IsThereAnyDeal](https://do
 
 ## Features do MVP
 
-- Home com ofertas em destaque, sort e filtros avançados.
+- Home estilo loja: destaque com arte da Steam e prateleiras temáticas.
+- Catálogo `/ofertas` com atalhos, filtros compactos (estado na URL) e coleções (`/ofertas/gratis`, `/ofertas/acabando`...).
 - Carregamento incremental com auto-load + botão manual `Carregar mais`.
 - Busca global com autocomplete (dropdown) e navegação direta para detalhe.
-- Página de detalhe com metadados, tabela de preços e histórico visual.
+- Página do jogo com caixa de compra, lista de lojas ordenada por preço e histórico visual.
 - URL amigável por slug (`/game/cyberpunk-2077`).
-- Favoritos e filtros locais via Pinia.
+- Favoritos em `/favoritos` com o melhor preço atual (até 50, salvos no navegador).
+- SEO: meta por página, JSON-LD de produto, canonical, `/sitemap.xml` e `/robots.txt`.
 
 ## Stack
 
@@ -39,6 +41,8 @@ Crie o `.env` com base no `.env.example`:
 
 ```bash
 ITAD_API_KEY=your_itad_key_here
+# URL pública, sem barra no final: usada no canonical, sitemap, robots e Open Graph
+NUXT_PUBLIC_SITE_URL=https://seu-dominio.com.br
 ```
 
 > Nunca commite sua chave real.
@@ -72,12 +76,17 @@ yarn preview
 ## Arquitetura rápida
 
 - `app.vue`: shell global (header, busca/autocomplete, footer)
-- `pages/index.vue`: catálogo principal e filtros
+- `pages/index.vue`: home (destaque + prateleiras de `/api/home`); links antigos `/?sort=` redirecionam para `/ofertas`
+- `pages/ofertas/index.vue`, `pages/ofertas/[colecao].vue`: catálogo e coleções (`components/catalog/**`, estado em `utils/catalog.ts`)
+- `pages/favoritos.vue`: favoritos com preço atual (`utils/favorites.ts`)
 - `pages/search/index.vue`: resultados de busca
-- `pages/game/[id].vue`: detalhe do jogo
+- `pages/game/[id].vue`: detalhe do jogo (`components/game/**`, ranking de ofertas em `utils/offers.ts`, SEO em `utils/seo.ts`)
 - `composables/useGamesApi.ts`: normalização e consumo da API
 - `server/utils/itad.ts`: cliente da ITAD (chave, validação de parâmetros, tratamento de erros)
-- `server/api/deals.get.ts`, `server/api/shops.get.ts`: ofertas (filtro de loja/desconto no servidor) e lojas
+- `server/utils/deals.ts` + `server/api/deals.get.ts`: ofertas com filtros da ITAD (loja, ativação, preço, desconto, mínima histórica) e filtros locais (tipo, validade)
+- `server/utils/home.ts` + `server/api/home.get.ts`: destaque e prateleiras da home (cache de 5 min)
+- `server/api/shops.get.ts`: lojas
+- `server/api/__sitemap__/urls.get.ts`, `server/routes/robots.txt.ts`: URLs dinâmicas do sitemap (`@nuxtjs/sitemap`) e robots
 - `server/api/games/**`: busca, lookup por slug, info, preços e histórico de um jogo
 - `server/api/steam/[appid].get.ts`: screenshots/trailers da Steam
 - `stores/games.ts`: estado global (favoritos/filtros)
@@ -86,7 +95,7 @@ yarn preview
 
 1. Suba o projeto no GitHub.
 2. Importe o repo na Vercel.
-3. Configure `ITAD_API_KEY` em Environment Variables (Production/Preview/Development).
+3. Configure `ITAD_API_KEY` e `NUXT_PUBLIC_SITE_URL` em Environment Variables (Production/Preview/Development).
 4. Faça o deploy.
 
 ## Segurança e boas práticas

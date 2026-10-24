@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/+$/, '')
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
@@ -9,7 +11,15 @@ export default defineNuxtConfig({
       ]
     }
   },
-  modules: ['@nuxt/ui', '@pinia/nuxt'],
+  modules: ['@nuxt/ui', '@pinia/nuxt', '@nuxtjs/sitemap'],
+  site: {
+    url: siteUrl,
+    name: 'GameDeals BR'
+  },
+  sitemap: {
+    sources: ['/api/__sitemap__/urls'],
+    exclude: ['/favoritos', '/search/**']
+  },
   icon: {
     serverBundle: {
       collections: ['heroicons']
@@ -18,7 +28,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     itadApiKey: process.env.ITAD_API_KEY || '',
     public: {
-      appName: 'GameDeals BR'
+      appName: 'GameDeals BR',
+      siteUrl
     }
   },
   typescript: {

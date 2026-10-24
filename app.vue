@@ -3,13 +3,38 @@
     <div class="flex min-h-screen flex-col bg-gray-950 text-gray-100">
       <header class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-gray-950/55 backdrop-blur-md">
         <UContainer class="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <NuxtLink
-            to="/"
-            class="text-lg font-semibold text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
-            aria-label="Ir para a página inicial"
-          >
-            {{ appName }}
-          </NuxtLink>
+          <div class="flex items-center justify-between gap-6">
+            <NuxtLink
+              to="/"
+              class="text-lg font-semibold text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+              aria-label="Ir para a página inicial"
+            >
+              {{ appName }}
+            </NuxtLink>
+
+            <nav class="flex items-center gap-4 text-sm font-medium" aria-label="Principal">
+              <NuxtLink to="/ofertas" class="text-gray-300 transition-colors hover:text-white" active-class="!text-white">
+                Ofertas
+              </NuxtLink>
+              <NuxtLink
+                to="/favoritos"
+                class="inline-flex items-center gap-1 text-gray-300 transition-colors hover:text-white"
+                active-class="!text-white"
+                :aria-label="`Favoritos, ${favoritesCount} ${favoritesCount === 1 ? 'jogo' : 'jogos'}`"
+              >
+                <span aria-hidden="true">♥</span> Favoritos
+                <ClientOnly>
+                  <span
+                    v-if="favoritesCount > 0"
+                    class="rounded-full bg-[#66c0f4] px-1.5 text-xs font-bold text-gray-950"
+                    aria-hidden="true"
+                  >
+                    {{ favoritesCount }}
+                  </span>
+                </ClientOnly>
+              </NuxtLink>
+            </nav>
+          </div>
 
           <div ref="searchContainerRef" class="relative w-full sm:w-80">
             <form @submit.prevent="handleSearchSubmit">
@@ -89,7 +114,14 @@ import type { GameSuggestion } from '~/composables/useGamesApi'
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
-const { searchGameSuggestions } = useGamesApi()
+const { searchGameSuggestions, getGameInfo } = useGamesApi()
+const gamesStore = useGamesStore()
+const favoritesCount = computed(() => gamesStore.favorites.length)
+
+onMounted(() => {
+  gamesStore.loadFavorites()
+  void gamesStore.migrateLegacyFavorites(getGameInfo)
+})
 const runtimeConfig = useRuntimeConfig()
 const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
 

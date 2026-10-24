@@ -1,9 +1,16 @@
+import { catalogStateToDealParams, type CatalogState } from '../utils/catalog'
+
+// ITAD deal flags: H = all-time low, N = new all-time low, S = store low.
+export type HistoryLowFlag = 'H' | 'N' | 'S'
+
 export type Game = {
   id: string
   slug: string
   title: string
   image: string
+  images: string[]
   price: { amount: number }[]
+  historyLowFlag?: HistoryLowFlag
   regularPrice?: number
   discount?: number
   store?: string
@@ -15,6 +22,7 @@ export type Game = {
 
 export type PriceRow = {
   store: string
+  shopId?: number
   price: number
   regularPrice?: number
   discount: number
@@ -24,10 +32,12 @@ export type PriceRow = {
   storeLow?: number
   updatedAt?: string
   link: string
+  voucher?: string
 }
 
 export type GameInfo = {
   id: string
+  slug: string
   title: string
   image: string
   appid?: number
@@ -61,14 +71,18 @@ export type TopGamesPageResult = {
   nextOffset: number
 }
 
-export type TopGamesFilters = {
-  shops?: number[]
-  minCut?: number
-}
-
 export type Shop = {
   id: number
   title: string
+}
+
+export type HeroGame = Game & { appid: number }
+
+export type HomeShelf = {
+  key: string
+  title: string
+  href: string
+  games: Game[]
 }
 
 export type GameSuggestion = {
@@ -85,7 +99,7 @@ export type PriceHistoryPoint = {
   shop: string
 }
 
-const slugify = (value: string): string => {
+export const slugify = (value: string): string => {
   return value
     .toLowerCase()
     .normalize('NFD')
@@ -115,21 +129,30 @@ const isComparableType = (item: Record<string, unknown>): boolean => {
   return type === 'game' || type === 'dlc'
 }
 
+// Cover candidates in preference order: the 2:3 boxart first, then wider banners.
+const coverImagesOf = (assets: unknown): string[] => {
+  const node = (assets ?? {}) as Record<string, unknown>
+  return [node.boxart, node.banner600, node.banner400, node.banner300]
+    .filter((image): image is string => typeof image === 'string' && image.length > 0)
+}
+
 const normalizeGame = (item: Record<string, unknown>, fallbackIndex: number): Game => {
-  const assets = (item.assets ?? {}) as Record<string, unknown>
   const title = String(item.title ?? item.name ?? `game-${fallbackIndex}`)
+  const images = coverImagesOf(item.assets)
 
   return {
     id: String(item.id ?? `game-${fallbackIndex}`),
     slug: String(item.slug ?? '') || slugify(title),
     title: String(item.title ?? item.name ?? 'Unknown game'),
-    image: String(assets.boxart ?? assets.banner300 ?? assets.banner400 ?? ''),
+    image: images[0] ?? '',
+    images,
     price: [{ amount: 0 }]
   }
 }
 
-const normalizeDealGame = (item: Record<string, unknown>, fallbackIndex: number): Game | null => {
-  if (String(item.type ?? '') !== 'game') {
+export const normalizeDealGame = (item: Record<string, unknown>, fallbackIndex: number): Game | null => {
+  const itemType = String(item.type ?? '')
+  if (itemType !== 'game' && itemType !== 'dlc') {
     return null
   }
 
@@ -141,14 +164,17 @@ const normalizeDealGame = (item: Record<string, unknown>, fallbackIndex: number)
   const amount = Number(dealPrice.amount ?? 0)
   const regularAmount = Number(regularPrice.amount ?? 0)
   const cut = Number(deal.cut ?? 0)
-  const assets = (item.assets ?? {}) as Record<string, unknown>
+  const images = coverImagesOf(item.assets)
+  const flag = ['H', 'N', 'S'].includes(String(deal.flag)) ? (deal.flag as HistoryLowFlag) : undefined
 
   return {
     id: String(item.id ?? `deal-${fallbackIndex}`),
     slug: String(item.slug ?? '') || slugify(itemTitle),
     title: itemTitle,
-    image: String(assets.boxart ?? assets.banner300 ?? assets.banner400 ?? ''),
+    image: images[0] ?? '',
+    images,
     price: [{ amount: Number.isFinite(amount) ? amount : 0 }],
+    historyLowFlag: flag,
     regularPrice: Number.isFinite(regularAmount) ? regularAmount : 0,
     discount: Number.isFinite(cut) ? cut : 0,
     store: String(shop.name ?? ''),
@@ -215,6 +241,7 @@ export const useGamesApi = () => {
       : ''
     return {
       id: String(entry.id ?? gameId),
+      slug: String(entry.slug ?? '') || slugify(String(entry.title ?? entry.name ?? '')),
       title: String(entry.title ?? entry.name ?? 'Unknown game'),
       image: String(assets.boxart ?? assets.banner300 ?? assets.banner400 ?? steamHeader),
       appid,
@@ -253,7 +280,7 @@ export const useGamesApi = () => {
     }
   }
 
-  const getBestPricesByGameId = async (gameIds: string[]): Promise<Map<string, number>> => {
+  const getBestPrices = async (gameIds: string[]): Promise<Map<string, number>> => {
     if (gameIds.length === 0) {
       return new Map()
     }
@@ -293,7 +320,7 @@ export const useGamesApi = () => {
       // instead of firing one extra request per result to look for an image.
       .filter((game) => Boolean(game.image))
 
-    const pricesMap = await getBestPricesByGameId(games.map((game) => game.id))
+    const pricesMap = await getBestPrices(games.map((game) => game.id))
 
     // Keep search grid focused on entries users can actually compare (cover + valid price).
     return games
@@ -320,25 +347,20 @@ export const useGamesApi = () => {
       })
   }
 
-  const getTopGames = async (
-    limit = 50,
-    sort = '-hot',
-    page = 1,
-    filters: TopGamesFilters = {}
-  ): Promise<TopGamesPageResult> => {
-    const safePage = Math.max(page, 1)
-    const offset = (safePage - 1) * limit
-    const shops = [...(filters.shops ?? [])].sort((a, b) => a - b).join(',')
-    const minCut = filters.minCut && filters.minCut > 0 ? filters.minCut : undefined
-    const cacheKey = `${sort}:${limit}:${offset}:${shops}:${minCut ?? 0}`
+  // offset is ITAD's nextOffset from the previous page: the server may read
+  // several ITAD pages per batch, so pages are not limit-sized steps.
+  const getDealsPage = async (state: CatalogState, offset: number, limit = 20): Promise<TopGamesPageResult> => {
+    const query = Object.fromEntries(
+      Object.entries({ ...catalogStateToDealParams(state), limit, offset })
+        .filter(([, value]) => value !== undefined)
+    )
+    const cacheKey = JSON.stringify(query)
 
     if (topGamesPageCache.value[cacheKey]) {
       return topGamesPageCache.value[cacheKey]
     }
 
-    const payload = await $fetch<{ list?: unknown[]; hasMore?: unknown; nextOffset?: unknown }>('/api/deals', {
-      query: { limit, offset, sort, shops: shops || undefined, minCut }
-    })
+    const payload = await $fetch<{ list?: unknown[]; hasMore?: unknown; nextOffset?: unknown }>('/api/deals', { query })
 
     const games = (Array.isArray(payload?.list) ? payload.list : [])
       .map((item, index) => normalizeDealGame(item as Record<string, unknown>, index))
@@ -357,6 +379,30 @@ export const useGamesApi = () => {
   const getShops = async (): Promise<Shop[]> => {
     const shops = await $fetch<Shop[]>('/api/shops')
     return Array.isArray(shops) ? shops : []
+  }
+
+  const getHome = async (): Promise<{ hero: HeroGame[]; shelves: HomeShelf[] }> => {
+    const payload = await $fetch<{
+      hero?: Array<{ deal?: unknown; appid?: unknown }>
+      shelves?: Array<{ key?: unknown; title?: unknown; href?: unknown; items?: unknown[] }>
+    }>('/api/home')
+
+    const hero = (payload?.hero ?? []).flatMap((entry, index) => {
+      const game = normalizeDealGame((entry.deal ?? {}) as Record<string, unknown>, index)
+      const appid = Number(entry.appid)
+      return game && Number.isInteger(appid) && appid > 0 ? [{ ...game, appid }] : []
+    })
+
+    const shelves = (payload?.shelves ?? []).map((shelf) => ({
+      key: String(shelf.key ?? ''),
+      title: String(shelf.title ?? ''),
+      href: String(shelf.href ?? '/ofertas'),
+      games: (shelf.items ?? [])
+        .map((item, index) => normalizeDealGame((item ?? {}) as Record<string, unknown>, index))
+        .filter((game): game is Game => game !== null)
+    })).filter((shelf) => shelf.games.length > 0)
+
+    return { hero, shelves }
   }
 
   const getGameIdBySlug = async (slug: string): Promise<string> => {
@@ -409,6 +455,7 @@ export const useGamesApi = () => {
 
       return {
         store: String(shop.name ?? 'Loja desconhecida'),
+        shopId: Number.isInteger(shop.id) ? Number(shop.id) : undefined,
         price: Number(price.amount ?? 0),
         regularPrice: Number(regular.amount ?? 0),
         discount: Number(deal.cut ?? 0),
@@ -417,7 +464,8 @@ export const useGamesApi = () => {
         historyLow: Number(historyLow.amount ?? 0),
         storeLow: Number(storeLow.amount ?? 0),
         updatedAt: typeof deal.timestamp === 'string' ? deal.timestamp : undefined,
-        link: String(deal.url ?? '#')
+        link: String(deal.url ?? '#'),
+        voucher: typeof deal.voucher === 'string' && deal.voucher ? deal.voucher : undefined
       }
     })
   }
@@ -472,7 +520,9 @@ export const useGamesApi = () => {
   return {
     searchGames,
     searchGameSuggestions,
-    getTopGames,
+    getDealsPage,
+    getBestPrices,
+    getHome,
     getShops,
     getGameIdBySlug,
     getGameInfo,

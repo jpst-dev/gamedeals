@@ -5,13 +5,17 @@ export const ITAD_COUNTRY = 'BR'
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-export const DEAL_SORTS = ['-hot', '-cut', 'price', '-price', '-added', 'title'] as const
+export const DEAL_SORTS = ['-hot', '-cut', 'price', '-price', '-added', 'title', 'expiry'] as const
 export type DealSort = (typeof DEAL_SORTS)[number]
 
 type QueryValue = string | string[] | undefined | null
 
 const firstValue = (value: unknown): string | undefined => {
   const raw = Array.isArray(value) ? value[0] : value
+  if (typeof raw === 'number') {
+    return String(raw)
+  }
+
   return typeof raw === 'string' ? raw : undefined
 }
 
@@ -90,7 +94,7 @@ export const buildItadUrl = (
   return url.toString()
 }
 
-type ItadFetchOptions = {
+export type ItadFetchOptions = {
   params?: Record<string, QueryValue | number | boolean>
   method?: 'GET' | 'POST'
   body?: unknown
