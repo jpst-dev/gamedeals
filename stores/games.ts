@@ -1,4 +1,12 @@
-import type { Game } from '~/composables/useGamesApi'
+import { slugify, type Game, type GameInfo } from '~/composables/useGamesApi'
+import {
+  migrateLegacyIds,
+  parseStoredFavorites,
+  toggleFavoriteEntry,
+  type FavoriteGame,
+  type FavoriteInput,
+  type ToggleResult
+} from '~/utils/favorites'
 
 type PriceFilter = {
   min: number | null
@@ -8,7 +16,9 @@ type PriceFilter = {
 const FAVORITES_STORAGE_KEY = 'gamedeals:favorites'
 
 export const useGamesStore = defineStore('games', () => {
-  const favorites = ref<string[]>([])
+  const favorites = ref<FavoriteGame[]>([])
+  // Ids saved by older versions, waiting for their game data.
+  const legacyFavoriteIds = ref<string[]>([])
   const priceFilter = ref<PriceFilter>({
     min: null,
     max: null
@@ -26,13 +36,29 @@ export const useGamesStore = defineStore('games', () => {
     }
   }
 
-  const toggleFavorite = (gameId: string): void => {
-    if (favorites.value.includes(gameId)) {
-      favorites.value = favorites.value.filter((id) => id !== gameId)
+  const isFavorite = (gameId: string): boolean => {
+    return favorites.value.some((item) => item.id === gameId) || legacyFavoriteIds.value.includes(gameId)
+  }
+
+  const toggleFavorite = (game: FavoriteInput): ToggleResult => {
+    const next = toggleFavoriteEntry({ items: favorites.value, legacyIds: legacyFavoriteIds.value }, game)
+    favorites.value = next.items
+    legacyFavoriteIds.value = next.legacyIds
+    return next.result
+  }
+
+  const migrateLegacyFavorites = async (getInfo: (gameId: string) => Promise<GameInfo>): Promise<void> => {
+    if (legacyFavoriteIds.value.length === 0) {
       return
     }
 
-    favorites.value.push(gameId)
+    const { migrated, pendingIds } = await migrateLegacyIds(legacyFavoriteIds.value, async (gameId) => {
+      const info = await getInfo(gameId)
+      return { id: gameId, slug: slugify(info.title), title: info.title, image: info.image, addedAt: new Date().toISOString() }
+    })
+    const known = new Set(favorites.value.map((item) => item.id))
+    favorites.value = [...favorites.value, ...migrated.filter((item) => !known.has(item.id))]
+    legacyFavoriteIds.value = pendingIds
   }
 
   const hydrateFavorites = (): void => {
@@ -40,21 +66,16 @@ export const useGamesStore = defineStore('games', () => {
       return
     }
 
+    let raw: string | null = null
     try {
-      const rawFavorites = window.localStorage.getItem(FAVORITES_STORAGE_KEY)
-      if (!rawFavorites) {
-        return
-      }
-
-      const parsed = JSON.parse(rawFavorites)
-      if (Array.isArray(parsed)) {
-        favorites.value = parsed
-          .map((entry) => String(entry))
-          .filter(Boolean)
-      }
+      raw = window.localStorage.getItem(FAVORITES_STORAGE_KEY)
     } catch {
-      favorites.value = []
+      raw = null
     }
+
+    const stored = parseStoredFavorites(raw)
+    favorites.value = stored.items
+    legacyFavoriteIds.value = stored.legacyIds
   }
 
   const filteredResults = computed(() => {
@@ -68,13 +89,20 @@ export const useGamesStore = defineStore('games', () => {
 
   if (import.meta.client) {
     hydrateFavorites()
-    watch(favorites, (nextFavorites) => {
-      window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(nextFavorites))
+    // Pending legacy ids are saved too, so a failed migration retries later.
+    watch([favorites, legacyFavoriteIds], ([items, legacyIds]) => {
+      try {
+        window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify([...items, ...legacyIds]))
+      } catch {
+        // Storage full or blocked: favorites still work for this visit.
+      }
     }, { deep: true })
   }
 
   return {
     favorites,
+    isFavorite,
+    migrateLegacyFavorites,
     priceFilter,
     searchResults,
     filteredResults,

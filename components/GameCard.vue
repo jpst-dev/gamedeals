@@ -31,7 +31,8 @@
               {{ game.title }}
             </h2>
 
-            <div class="mt-2 space-y-1 pb-1">
+            <p v-if="noOffer" class="mt-2 pb-1 text-sm text-gray-300">Sem ofertas no momento</p>
+            <div v-else class="mt-2 space-y-1 pb-1">
               <p class="text-base font-bold text-primary-300">
                 {{ formattedLowestPrice }}
               </p>
@@ -57,7 +58,7 @@
     <!-- Outside the link: a button nested in an anchor is invalid and confuses screen readers. -->
     <button
       type="button"
-      class="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-950/80 text-white backdrop-blur transition-colors hover:bg-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+      class="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-950/80 backdrop-blur transition-colors hover:bg-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
       :class="isFavorite ? 'text-rose-400' : 'text-white'"
       :aria-pressed="isFavorite"
       :aria-label="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
@@ -74,6 +75,7 @@ import type { Game } from '~/composables/useGamesApi'
 const props = defineProps<{
   game: Game
   isFavorite?: boolean
+  noOffer?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -83,7 +85,7 @@ const emit = defineEmits<{
 const hasDiscount = computed(() => Number(props.game.discount ?? 0) > 0)
 const hasRegularPrice = computed(() => Number(props.game.regularPrice ?? 0) > 0)
 const isHistoryLow = computed(() => props.game.historyLowFlag === 'H' || props.game.historyLowFlag === 'N')
-const cardLabel = computed(() => `${props.game.title}, ${formattedLowestPrice.value}`)
+const cardLabel = computed(() => `${props.game.title}, ${props.noOffer ? 'sem ofertas' : formattedLowestPrice.value}`)
 
 const gameHref = computed(() => {
   return `/game/${props.game.slug}`

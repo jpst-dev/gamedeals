@@ -26,8 +26,8 @@
         v-for="shelf in home.shelves"
         :key="shelf.key"
         :shelf="shelf"
-        :is-favorite="(gameId) => gamesStore.favorites.includes(gameId)"
-        @toggle-favorite="(game) => gamesStore.toggleFavorite(game.id)"
+        :is-favorite="gamesStore.isFavorite"
+        @toggle-favorite="toggleFavorite"
       />
     </template>
   </div>
@@ -36,6 +36,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const gamesStore = useGamesStore()
+const toggleFavorite = useFavoriteToggle()
 const { getHome } = useGamesApi()
 const runtimeConfig = useRuntimeConfig()
 const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')

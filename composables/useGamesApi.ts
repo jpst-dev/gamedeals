@@ -98,7 +98,7 @@ export type PriceHistoryPoint = {
   shop: string
 }
 
-const slugify = (value: string): string => {
+export const slugify = (value: string): string => {
   return value
     .toLowerCase()
     .normalize('NFD')
@@ -278,7 +278,7 @@ export const useGamesApi = () => {
     }
   }
 
-  const getBestPricesByGameId = async (gameIds: string[]): Promise<Map<string, number>> => {
+  const getBestPrices = async (gameIds: string[]): Promise<Map<string, number>> => {
     if (gameIds.length === 0) {
       return new Map()
     }
@@ -318,7 +318,7 @@ export const useGamesApi = () => {
       // instead of firing one extra request per result to look for an image.
       .filter((game) => Boolean(game.image))
 
-    const pricesMap = await getBestPricesByGameId(games.map((game) => game.id))
+    const pricesMap = await getBestPrices(games.map((game) => game.id))
 
     // Keep search grid focused on entries users can actually compare (cover + valid price).
     return games
@@ -519,6 +519,7 @@ export const useGamesApi = () => {
     searchGames,
     searchGameSuggestions,
     getDealsPage,
+    getBestPrices,
     getHome,
     getShops,
     getGameIdBySlug,

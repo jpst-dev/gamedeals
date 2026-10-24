@@ -42,8 +42,8 @@
         v-for="game in gamesStore.filteredResults"
         :key="game.id"
         :game="game"
-        :is-favorite="gamesStore.favorites.includes(game.id)"
-        @toggle-favorite="(game) => gamesStore.toggleFavorite(game.id)"
+        :is-favorite="gamesStore.isFavorite(game.id)"
+        @toggle-favorite="toggleFavorite"
       />
     </div>
   </section>
@@ -53,6 +53,7 @@
 const route = useRoute()
 const toast = useToast()
 const gamesStore = useGamesStore()
+const toggleFavorite = useFavoriteToggle()
 const { searchGames } = useGamesApi()
 const runtimeConfig = useRuntimeConfig()
 const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
