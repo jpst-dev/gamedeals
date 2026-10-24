@@ -16,7 +16,7 @@ Comparador de ofertas de jogos para PC, com dados da [IsThereAnyDeal](https://do
 - Nuxt 3 (SSR) + Vue 3 + TypeScript strict
 - Tailwind CSS + Nuxt UI
 - Pinia
-- Nitro API route (`server/api/itad-proxy.ts`)
+- Nitro API routes REST (GET) com cache SWR (`server/api/**`)
 - Chart.js + vue-chartjs
 - Yarn 4 (`node_modules` linker)
 
@@ -76,7 +76,10 @@ yarn preview
 - `pages/search/index.vue`: resultados de busca
 - `pages/game/[id].vue`: detalhe do jogo
 - `composables/useGamesApi.ts`: normalização e consumo da API
-- `server/api/itad-proxy.ts`: proxy seguro para ITAD
+- `server/utils/itad.ts`: cliente da ITAD (chave, validação de parâmetros, tratamento de erros)
+- `server/api/deals.get.ts`, `server/api/shops.get.ts`: ofertas (filtro de loja/desconto no servidor) e lojas
+- `server/api/games/**`: busca, lookup por slug, info, preços e histórico de um jogo
+- `server/api/steam/[appid].get.ts`: screenshots/trailers da Steam
 - `stores/games.ts`: estado global (favoritos/filtros)
 
 ## Deploy (GitHub + Vercel)

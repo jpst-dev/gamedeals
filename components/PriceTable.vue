@@ -25,10 +25,6 @@
         <span class="text-xs text-gray-300">{{ row.platforms }}</span>
       </template>
 
-      <template #region-data="{ row }">
-        <span class="text-xs text-gray-300">{{ row.region }}</span>
-      </template>
-
       <template #link-data="{ row }">
         <UButton
           size="xs"
@@ -37,7 +33,7 @@
           :to="row.link"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Open affiliate link"
+          aria-label="Abrir oferta na loja"
         >
           Ver oferta
         </UButton>
@@ -54,20 +50,20 @@
           size="xs"
           variant="outline"
           :disabled="currentPage === 1"
-          aria-label="Previous offers page"
+          aria-label="Página anterior de ofertas"
           @click="currentPage -= 1"
         >
           Anterior
         </UButton>
-        <span class="text-xs text-gray-300">Pagina {{ currentPage }} de {{ totalPages }}</span>
+        <span class="text-xs text-gray-300">Página {{ currentPage }} de {{ totalPages }}</span>
         <UButton
           size="xs"
           variant="outline"
           :disabled="currentPage >= totalPages"
-          aria-label="Next offers page"
+          aria-label="Próxima página de ofertas"
           @click="currentPage += 1"
         >
-          Proxima
+          Próxima
         </UButton>
       </div>
     </div>
@@ -83,13 +79,12 @@ const props = defineProps<{
 
 const columns = [
   { key: 'store', label: 'Loja' },
-  { key: 'price', label: 'Preco' },
-  { key: 'regularPrice', label: 'Preco original' },
+  { key: 'price', label: 'Preço' },
+  { key: 'regularPrice', label: 'Preço original' },
   { key: 'discount', label: 'Desconto' },
-  { key: 'activation', label: 'Ativacao' },
+  { key: 'activation', label: 'Ativação' },
   { key: 'platforms', label: 'Plataforma' },
-  { key: 'region', label: 'Regiao' },
-  { key: 'link', label: 'Link afiliado' }
+  { key: 'link', label: 'Link' }
 ]
 
 const currentPage = ref(1)
