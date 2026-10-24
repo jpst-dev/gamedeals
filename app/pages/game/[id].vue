@@ -17,7 +17,8 @@
         <div class="absolute inset-0 bg-linear-to-b from-gray-900/10 via-gray-950/70 to-gray-950" />
       </div>
 
-      <div class="relative z-10 space-y-8">
+      <!-- mt-8: Tailwind 3 space-y gave this margin (it follows the absolute backdrop). -->
+      <div class="relative z-10 mt-8 space-y-8">
         <div class="space-y-3">
           <h1 class="text-3xl font-bold text-white">{{ gameInfo?.title }}</h1>
           <div class="grid gap-4 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">

@@ -41,6 +41,7 @@
               <form @submit.prevent="handleSearchSubmit">
                 <label for="global-search" class="sr-only">Buscar jogo pelo nome</label>
                 <UInput
+                  class="w-full"
                   id="global-search"
                   v-model="searchValue"
                   icon="i-heroicons-magnifying-glass"

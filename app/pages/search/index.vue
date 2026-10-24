@@ -9,6 +9,7 @@
 
     <div class="grid gap-3 rounded-xl border border-gray-800 bg-gray-900 p-4 sm:grid-cols-2">
       <UInput
+        class="w-full"
         v-model.number="minPriceModel"
         type="number"
         min="0"
@@ -17,6 +18,7 @@
         aria-label="Preço mínimo"
       />
       <UInput
+        class="w-full"
         v-model.number="maxPriceModel"
         type="number"
         min="0"

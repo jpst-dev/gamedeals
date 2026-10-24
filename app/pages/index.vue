@@ -21,7 +21,8 @@
 
     <template v-else>
       <h1 class="sr-only">Promoções de jogos para PC no Brasil</h1>
-      <HomeHeroCarousel v-if="home.hero.length > 0" :games="home.hero" />
+      <!-- Tailwind 3 space-y gave the hero this top margin (it follows the sr-only h1). -->
+      <HomeHeroCarousel v-if="home.hero.length > 0" class="mt-10" :games="home.hero" />
       <HomeDealShelf
         v-for="shelf in home.shelves"
         :key="shelf.key"

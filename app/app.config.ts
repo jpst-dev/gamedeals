@@ -1,9 +1,9 @@
 export default defineAppConfig({
   ui: {
     colors: {
-      // Green was Nuxt UI v2's primary; zinc is the closest neutral to v2's cool gray.
+      // Same as Nuxt UI v2: green primary, cool gray (Tailwind's gray) neutral.
       primary: 'green',
-      neutral: 'zinc'
+      neutral: 'gray'
     }
   }
 })
