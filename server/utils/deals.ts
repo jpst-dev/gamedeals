@@ -36,6 +36,8 @@ export const EXPIRING_WINDOW_MS = 7 * 86_400_000
 // When we filter on our side (type, expiry) a page from ITAD can shrink a lot;
 // fetch a few more pages to fill it, but never fan out unbounded.
 export const MAX_ITAD_CALLS_PER_PAGE = 3
+// ITAD's /deals/v2 page cap; used when local filters discard most results.
+const ITAD_MAX_PAGE_SIZE = 200
 
 export const parseDealQuery = (query: Record<string, unknown>): DealQuery => ({
   sort: parseDealSort(query.sort),
@@ -95,15 +97,20 @@ export const fetchDealsPage = async (
   now = Date.now()
 ): Promise<DealsPage> => {
   const filter = buildDealsFilter(query)
+  // Expired deals sort first and DLCs are a small share of the catalog, so
+  // those queries would come back nearly empty with limit-sized ITAD pages.
+  const pageSize = query.sort === 'expiry' || query.kind === 'dlcs' ? ITAD_MAX_PAGE_SIZE : query.limit
   const list: unknown[] = []
   let offset = query.offset
   let hasMore = true
+  // Another ITAD round trip is only worth it for a mostly empty batch.
+  const minItems = Math.ceil(query.limit / 2)
 
-  for (let call = 0; call < MAX_ITAD_CALLS_PER_PAGE && hasMore && list.length < query.limit; call++) {
+  for (let call = 0; call < MAX_ITAD_CALLS_PER_PAGE && hasMore && list.length < minItems; call++) {
     const response = await fetcher<{ list?: unknown[]; hasMore?: unknown; nextOffset?: unknown }>('/deals/v2', {
       params: {
         country: ITAD_COUNTRY,
-        limit: query.limit,
+        limit: pageSize,
         offset,
         sort: query.sort,
         nondeals: false,
@@ -119,5 +126,6 @@ export const fetchDealsPage = async (
     offset = Number.isFinite(nextOffset) ? nextOffset : offset + items.length
   }
 
-  return { list: list.slice(0, query.limit), hasMore, nextOffset: offset }
+  // Return everything read: nextOffset is already past these items.
+  return { list, hasMore, nextOffset: offset }
 }

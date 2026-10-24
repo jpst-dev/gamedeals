@@ -101,4 +101,33 @@ describe('server/utils/deals', () => {
       })
     })
   })
+
+  it('never drops items it already paged past', async () => {
+    const { parseDealQuery, fetchDealsPage } = await loadDeals()
+    const games = (from: number, count: number) => Array.from({ length: count }, (_, index) => ({ id: String(from + index), type: 'game' }))
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce({ list: [...games(0, 5), { id: 'x', type: 'dlc' }], hasMore: true, nextOffset: 20 })
+      .mockResolvedValueOnce({ list: games(100, 18), hasMore: true, nextOffset: 40 })
+    const page = await fetchDealsPage(parseDealQuery({ limit: 20 }), fetcher as never)
+    expect(page.list).toHaveLength(23)
+    expect(page.nextOffset).toBe(40)
+  })
+
+  it('reads larger ITAD pages when most results are filtered out locally', async () => {
+    const { parseDealQuery, fetchDealsPage } = await loadDeals()
+    const fetcher = vi.fn().mockResolvedValue({ list: [], hasMore: false, nextOffset: 0 })
+    await fetchDealsPage(parseDealQuery({ sort: 'expiry', limit: 20 }), fetcher as never)
+    await fetchDealsPage(parseDealQuery({ kind: 'dlcs', limit: 20 }), fetcher as never)
+    await fetchDealsPage(parseDealQuery({ limit: 20 }), fetcher as never)
+    expect(fetcher.mock.calls.map(([, options]) => options.params.limit)).toEqual([200, 200, 20])
+  })
+
+  it('does not spend another ITAD call on a nearly full page', async () => {
+    const { parseDealQuery, fetchDealsPage } = await loadDeals()
+    const list = [...Array.from({ length: 19 }, (_, index) => ({ id: String(index), type: 'game' })), { id: 'd', type: 'dlc' }]
+    const fetcher = vi.fn().mockResolvedValue({ list, hasMore: true, nextOffset: 20 })
+    const page = await fetchDealsPage(parseDealQuery({ limit: 20 }), fetcher as never)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(page.list).toHaveLength(19)
+  })
 })

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { DEFAULT_CATALOG_STATE } from '../../utils/catalog'
 
 type StateRef<T> = { value: T }
 
@@ -93,7 +94,7 @@ describe('composables/useGamesApi', () => {
     await expect(api.getGameIdBySlug('missing-game')).rejects.toThrow('Game not found for this slug.')
   })
 
-  it('caches top games by sort, limit, page and server filters', async () => {
+  it('caches deal pages by catalog state and offset', async () => {
     const fetchMock = vi.fn(async () => ({
       list: [
         {
@@ -119,13 +120,15 @@ describe('composables/useGamesApi', () => {
     setupComposableGlobals(fetchMock)
 
     const api = await loadApi()
-    const firstCall = await api.getTopGames(20, '-hot', 1)
-    const secondCall = await api.getTopGames(20, '-hot', 1)
-    await api.getTopGames(20, '-hot', 1, { shops: [61], minCut: 50 })
+    const firstCall = await api.getDealsPage(DEFAULT_CATALOG_STATE, 0)
+    const secondCall = await api.getDealsPage(DEFAULT_CATALOG_STATE, 0)
+    expect(fetchMock).toHaveBeenCalledWith('/api/deals', { query: { sort: '-hot', limit: 20, offset: 0 } })
+
+    await api.getDealsPage({ ...DEFAULT_CATALOG_STATE, lojas: [61], desconto: 50 }, 20)
 
     expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock).toHaveBeenLastCalledWith('/api/deals', {
-      query: { limit: 20, offset: 0, sort: '-hot', shops: '61', minCut: 50 }
+      query: { sort: '-hot', shops: '61', minCut: 50, limit: 20, offset: 20 }
     })
     expect(firstCall.games.map((game) => game.slug)).toEqual(['test-game'])
     expect(secondCall.games).toHaveLength(1)
@@ -138,7 +141,7 @@ describe('composables/useGamesApi', () => {
     setupComposableGlobals(fetchMock)
 
     const api = await loadApi()
-    const result = await api.getTopGames(20, '-hot', 1)
+    const result = await api.getDealsPage(DEFAULT_CATALOG_STATE, 0)
 
     expect(result.games.map((game) => game.title)).toEqual(['Bundle of Joy'])
   })
@@ -230,5 +233,13 @@ describe('getHome', () => {
     expect(fetchMock).toHaveBeenCalledWith('/api/home')
     expect(home.hero[0]).toMatchObject({ id: 'h', appid: 1086940, price: [{ amount: 139.99 }] })
     expect(home.shelves[0]!.games.map((game) => game.id)).toEqual(['a'])
+  })
+})
+
+describe('normalizeDealGame types', () => {
+  it('keeps DLC deals so the DLC catalog filter has results', async () => {
+    const { normalizeDealGame } = await loadModule()
+    expect(normalizeDealGame({ id: 'd', title: 'D', type: 'dlc', deal: {} }, 0)?.id).toBe('d')
+    expect(normalizeDealGame({ id: 'p', title: 'P', type: 'package', deal: {} }, 0)).toBeNull()
   })
 })

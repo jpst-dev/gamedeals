@@ -1,3 +1,5 @@
+import { catalogStateToDealParams, type CatalogState } from '../utils/catalog'
+
 // ITAD deal flags: H = all-time low, N = new all-time low, S = store low.
 export type HistoryLowFlag = 'H' | 'N' | 'S'
 
@@ -64,11 +66,6 @@ export type TopGamesPageResult = {
   games: Game[]
   hasMore: boolean
   nextOffset: number
-}
-
-export type TopGamesFilters = {
-  shops?: number[]
-  minCut?: number
 }
 
 export type Shop = {
@@ -151,7 +148,8 @@ const normalizeGame = (item: Record<string, unknown>, fallbackIndex: number): Ga
 }
 
 export const normalizeDealGame = (item: Record<string, unknown>, fallbackIndex: number): Game | null => {
-  if (String(item.type ?? '') !== 'game') {
+  const itemType = String(item.type ?? '')
+  if (itemType !== 'game' && itemType !== 'dlc') {
     return null
   }
 
@@ -345,25 +343,20 @@ export const useGamesApi = () => {
       })
   }
 
-  const getTopGames = async (
-    limit = 50,
-    sort = '-hot',
-    page = 1,
-    filters: TopGamesFilters = {}
-  ): Promise<TopGamesPageResult> => {
-    const safePage = Math.max(page, 1)
-    const offset = (safePage - 1) * limit
-    const shops = [...(filters.shops ?? [])].sort((a, b) => a - b).join(',')
-    const minCut = filters.minCut && filters.minCut > 0 ? filters.minCut : undefined
-    const cacheKey = `${sort}:${limit}:${offset}:${shops}:${minCut ?? 0}`
+  // offset is ITAD's nextOffset from the previous page: the server may read
+  // several ITAD pages per batch, so pages are not limit-sized steps.
+  const getDealsPage = async (state: CatalogState, offset: number, limit = 20): Promise<TopGamesPageResult> => {
+    const query = Object.fromEntries(
+      Object.entries({ ...catalogStateToDealParams(state), limit, offset })
+        .filter(([, value]) => value !== undefined)
+    )
+    const cacheKey = JSON.stringify(query)
 
     if (topGamesPageCache.value[cacheKey]) {
       return topGamesPageCache.value[cacheKey]
     }
 
-    const payload = await $fetch<{ list?: unknown[]; hasMore?: unknown; nextOffset?: unknown }>('/api/deals', {
-      query: { limit, offset, sort, shops: shops || undefined, minCut }
-    })
+    const payload = await $fetch<{ list?: unknown[]; hasMore?: unknown; nextOffset?: unknown }>('/api/deals', { query })
 
     const games = (Array.isArray(payload?.list) ? payload.list : [])
       .map((item, index) => normalizeDealGame(item as Record<string, unknown>, index))
@@ -521,7 +514,7 @@ export const useGamesApi = () => {
   return {
     searchGames,
     searchGameSuggestions,
-    getTopGames,
+    getDealsPage,
     getHome,
     getShops,
     getGameIdBySlug,
