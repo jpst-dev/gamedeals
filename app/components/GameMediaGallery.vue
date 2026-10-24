@@ -90,7 +90,7 @@
             v-for="(item, index) in props.mediaItems"
             :key="`thumb-${item.key}`"
             class="!h-16 !w-28 overflow-hidden rounded-md border transition-all"
-            :class="index === activeIndex ? 'border-primary-400 ring-1 ring-primary-400/70' : 'border-gray-700 hover:border-gray-500'"
+            :class="index === activeIndex ? 'border-green-400 ring-1 ring-green-400/70' : 'border-gray-700 hover:border-gray-500'"
           >
             <button
               type="button"

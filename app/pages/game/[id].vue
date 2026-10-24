@@ -1,7 +1,7 @@
 <template>
   <section class="relative isolate space-y-8">
     <div v-if="pending" class="space-y-4">
-      <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-primary-400" />
+      <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-green-400" />
       <USkeleton class="h-60 rounded-xl" />
     </div>
 
@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                  <UBadge v-for="tag in topTags" :key="tag" color="gray" variant="soft">{{ tag }}</UBadge>
+                  <UBadge v-for="tag in topTags" :key="tag" color="neutral" variant="soft">{{ tag }}</UBadge>
                 </div>
               </div>
 
@@ -285,7 +285,7 @@ watch(
       toast.add({
         title: 'Erro ao carregar jogo',
         description: 'Não foi possível carregar detalhes e preços.',
-        color: 'red'
+        color: 'error'
       })
     }
   },

@@ -222,7 +222,7 @@ const loadMore = async (mode: 'manual' | 'auto'): Promise<void> => {
       autoLoadedBatches.value += 1
     }
   } catch {
-    toast.add({ title: 'Erro ao carregar mais ofertas', description: 'Tente novamente em instantes.', color: 'red' })
+    toast.add({ title: 'Erro ao carregar mais ofertas', description: 'Tente novamente em instantes.', color: 'error' })
   } finally {
     isLoadingMore.value = false
     isAutoLoading.value = false

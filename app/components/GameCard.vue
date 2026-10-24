@@ -1,9 +1,9 @@
 <template>
   <article
-    class="group relative mx-auto w-full max-w-sm overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-500 hover:shadow-xl hover:shadow-primary-950/40"
+    class="group relative mx-auto w-full max-w-sm overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-green-500 hover:shadow-xl hover:shadow-green-950/40"
     :aria-label="cardLabel"
   >
-    <NuxtLink :to="gameHref" class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
+    <NuxtLink :to="gameHref" class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400">
       <div class="relative w-full overflow-hidden rounded-xl bg-gray-950 [clip-path:inset(0_round_0.75rem)] [contain:paint]">
         <GameCover
           :sources="game.images"
@@ -33,7 +33,7 @@
 
             <p v-if="noOffer" class="mt-2 pb-1 text-sm text-gray-300">Sem ofertas no momento</p>
             <div v-else class="mt-2 space-y-1 pb-1">
-              <p class="text-base font-bold text-primary-300">
+              <p class="text-base font-bold text-green-300">
                 {{ formattedLowestPrice }}
               </p>
               <p v-if="hasRegularPrice" class="text-xs text-gray-300 line-through">
@@ -58,7 +58,7 @@
     <!-- Outside the link: a button nested in an anchor is invalid and confuses screen readers. -->
     <button
       type="button"
-      class="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-950/80 backdrop-blur transition-colors hover:bg-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+      class="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-950/80 backdrop-blur transition-colors hover:bg-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
       :class="isFavorite ? 'text-rose-400' : 'text-white'"
       :aria-pressed="isFavorite"
       :aria-label="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
