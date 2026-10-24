@@ -8,7 +8,7 @@
       {{ tag.label }}
       <button
         type="button"
-        class="rounded-full px-1.5 text-gray-400 hover:bg-gray-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4]"
+        class="rounded-full px-1.5 text-gray-400 hover:bg-gray-700 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#66c0f4]"
         :aria-label="`Remover filtro ${tag.label}`"
         @click="emit('remove', tag.remove)"
       >

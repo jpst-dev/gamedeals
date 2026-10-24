@@ -7,20 +7,20 @@
             <div class="flex items-center justify-between gap-6">
               <NuxtLink
                 to="/"
-                class="text-lg font-semibold text-green-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+                class="text-lg font-semibold text-green-400 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-green-400"
                 aria-label="Ir para a página inicial"
               >
                 {{ appName }}
               </NuxtLink>
 
               <nav class="flex items-center gap-4 text-sm font-medium" aria-label="Principal">
-                <NuxtLink to="/ofertas" class="text-gray-300 transition-colors hover:text-white" active-class="!text-white">
+                <NuxtLink to="/ofertas" class="text-gray-300 transition-colors hover:text-white" active-class="text-white!">
                   Ofertas
                 </NuxtLink>
                 <NuxtLink
                   to="/favoritos"
                   class="inline-flex items-center gap-1 text-gray-300 transition-colors hover:text-white"
-                  active-class="!text-white"
+                  active-class="text-white!"
                   :aria-label="`Favoritos, ${favoritesCount} ${favoritesCount === 1 ? 'jogo' : 'jogos'}`"
                 >
                   <span aria-hidden="true">♥</span> Favoritos
@@ -58,7 +58,7 @@
 
               <div
                 v-if="showSuggestions"
-                class="custom-scrollbar absolute z-[120] mt-2 max-h-96 w-full overflow-y-auto rounded-lg border border-gray-700 bg-gray-900 shadow-xl"
+                class="custom-scrollbar absolute z-120 mt-2 max-h-96 w-full overflow-y-auto rounded-lg border border-gray-700 bg-gray-900 shadow-xl"
               >
                 <div v-if="isSuggestionsLoading" class="px-3 py-2 text-xs text-gray-400">
                   Buscando jogos...
@@ -76,7 +76,7 @@
                   <img
                     :src="suggestion.image || fallbackCover"
                     :alt="`Capa de ${suggestion.title}`"
-                    class="h-10 w-7 rounded object-cover"
+                    class="h-10 w-7 rounded-sm object-cover"
                     loading="lazy"
                   >
                   <div class="min-w-0">

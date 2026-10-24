@@ -25,7 +25,7 @@
     />
 
     <div v-if="isStale || (pending && loadedGames.length === 0)" :class="GRID_CLASS" aria-busy="true">
-      <div v-for="index in 8" :key="index" class="aspect-[2/3] animate-pulse rounded-xl bg-gray-800/60" />
+      <div v-for="index in 8" :key="index" class="aspect-2/3 animate-pulse rounded-xl bg-gray-800/60" />
     </div>
 
     <div v-else-if="error" class="rounded-lg border border-red-600/30 bg-red-950/40 p-4 text-sm text-red-200">

@@ -12,16 +12,16 @@
     >
       <SwiperSlide v-for="(game, index) in games" :key="game.id">
         <article class="relative bg-gray-950">
-          <div class="relative h-40 sm:h-80 lg:h-[26rem]">
+          <div class="relative h-40 sm:h-80 lg:h-104">
             <GameCover
               :sources="backgroundSources(game)"
               :title="game.title"
               :ratio="16 / 9"
               fit="cover"
               :eager="index === 0"
-              class="!absolute inset-0 !h-full"
+              class="absolute! inset-0 h-full!"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/30 to-transparent sm:bg-gradient-to-r sm:from-gray-950 sm:via-gray-950/80" />
+            <div class="absolute inset-0 bg-linear-to-t from-gray-950 via-gray-950/30 to-transparent sm:bg-linear-to-r sm:from-gray-950 sm:via-gray-950/80" />
           </div>
 
           <div class="relative flex items-end gap-4 px-4 pb-10 -mt-16 sm:absolute sm:inset-x-0 sm:bottom-0 sm:mt-0 sm:px-16 sm:pb-12">
@@ -42,13 +42,13 @@
                 <span v-if="(game.regularPrice ?? 0) > 0" class="text-sm text-gray-400 line-through">
                   {{ formatPrice(game.regularPrice ?? 0) }}
                 </span>
-                <span v-if="(game.discount ?? 0) > 0" class="rounded bg-green-600 px-1.5 py-0.5 text-xs font-bold text-white">
+                <span v-if="(game.discount ?? 0) > 0" class="rounded-sm bg-green-600 px-1.5 py-0.5 text-xs font-bold text-white">
                   -{{ game.discount }}%
                 </span>
               </p>
               <NuxtLink
                 :to="`/game/${game.slug}`"
-                class="inline-flex rounded-lg bg-[#66c0f4] px-4 py-2 text-sm font-bold text-gray-950 transition-colors hover:bg-sky-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                class="inline-flex rounded-lg bg-[#66c0f4] px-4 py-2 text-sm font-bold text-gray-950 transition-colors hover:bg-sky-300 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white"
               >
                 Ver ofertas
               </NuxtLink>

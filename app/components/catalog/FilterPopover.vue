@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div v-if="open" class="fixed inset-0 z-[60]" @keydown="onKeydown">
+    <div v-if="open" class="fixed inset-0 z-60" @keydown="onKeydown">
       <div class="absolute inset-0 bg-black/60 sm:bg-transparent" aria-hidden="true" @click="emit('close')" />
 
       <div
@@ -15,7 +15,7 @@
           <h2 id="filter-popover-title" class="text-sm font-semibold text-white">Filtros</h2>
           <button
             type="button"
-            class="rounded p-1 text-gray-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4]"
+            class="rounded-sm p-1 text-gray-400 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#66c0f4]"
             aria-label="Fechar filtros"
             @click="emit('close')"
           >
@@ -175,7 +175,7 @@ const showAllShops = ref(false)
 const priceDraft = ref(PRICE_UNLIMITED)
 
 const chipClass = (active: boolean): string => [
-  'rounded-full border px-2.5 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4]',
+  'rounded-full border px-2.5 py-1 text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#66c0f4]',
   active ? 'border-[#66c0f4] bg-[#66c0f4] font-semibold text-gray-950' : 'border-gray-700 text-gray-200 hover:border-gray-500'
 ].join(' ')
 

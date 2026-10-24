@@ -11,7 +11,7 @@
       </div>
 
       <div v-else-if="pending && !bestPrices" :class="GRID_CLASS">
-        <div v-for="index in Math.min(gamesStore.favorites.length, 10)" :key="index" class="aspect-[2/3] animate-pulse rounded-xl bg-gray-800/60" />
+        <div v-for="index in Math.min(gamesStore.favorites.length, 10)" :key="index" class="aspect-2/3 animate-pulse rounded-xl bg-gray-800/60" />
       </div>
 
       <div v-else :class="GRID_CLASS">
@@ -27,7 +27,7 @@
 
       <template #fallback>
         <div :class="GRID_CLASS">
-          <div v-for="index in 5" :key="index" class="aspect-[2/3] animate-pulse rounded-xl bg-gray-800/60" />
+          <div v-for="index in 5" :key="index" class="aspect-2/3 animate-pulse rounded-xl bg-gray-800/60" />
         </div>
       </template>
     </ClientOnly>

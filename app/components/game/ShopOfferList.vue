@@ -15,7 +15,7 @@
       >
         <span
           v-if="offer.isBest"
-          class="absolute -top-2 left-3 rounded bg-green-600 px-1.5 py-px text-[10px] font-bold tracking-wide text-white"
+          class="absolute -top-2 left-3 rounded-sm bg-green-600 px-1.5 py-px text-[10px] font-bold tracking-wide text-white"
         >
           MELHOR PREÇO
         </span>
@@ -54,7 +54,7 @@
           :href="offer.link"
           target="_blank"
           rel="noopener noreferrer nofollow"
-          class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white"
           :class="offer.isBest ? 'bg-[#66c0f4] text-gray-950 hover:bg-sky-300' : 'border border-[#66c0f4]/60 text-[#66c0f4] hover:bg-[#66c0f4]/10'"
           :aria-label="`Comprar na ${offer.store} por ${formatBrl(offer.price)}`"
         >

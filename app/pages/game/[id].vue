@@ -14,7 +14,7 @@
         class="pointer-events-none absolute left-1/2 -top-28 z-0 h-[calc(100%+7rem)] w-screen -translate-x-1/2 overflow-hidden sm:-top-24 sm:h-[calc(100%+6rem)]"
       >
         <div class="absolute inset-0 scale-105 bg-cover bg-center opacity-60 blur-md" :style="heroBackdropStyle" />
-        <div class="absolute inset-0 bg-gradient-to-b from-gray-900/10 via-gray-950/70 to-gray-950" />
+        <div class="absolute inset-0 bg-linear-to-b from-gray-900/10 via-gray-950/70 to-gray-950" />
       </div>
 
       <div class="relative z-10 space-y-8">
