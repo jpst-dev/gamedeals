@@ -29,29 +29,30 @@
               embedded
             />
 
-            <aside class="min-w-0 space-y-4 rounded-xl border border-white/10 bg-gray-900/45 p-4 backdrop-blur-md">
-              <img
-                :src="sidebarHeaderImage"
-                :alt="`Imagem de ${gameInfo?.title ?? 'jogo'}`"
-                class="h-auto w-full rounded-lg"
-              >
+            <!-- Two sibling cards instead of the buy box nested inside the info card. -->
+            <aside class="min-w-0 space-y-4">
+              <div class="space-y-4 rounded-xl border border-white/10 bg-gray-900/45 p-4 backdrop-blur-md">
+                <img
+                  :src="sidebarHeaderImage"
+                  :alt="`Imagem de ${gameInfo?.title ?? 'jogo'}`"
+                  class="h-auto w-full rounded-lg"
+                >
 
-              <p class="text-sm text-gray-300">
-                {{ gameDescription }}
-              </p>
+                <p class="text-sm text-gray-300">
+                  {{ gameDescription }}
+                </p>
 
-              <GameBuyBox :offers="offers" />
-
-              <div class="space-y-2 text-sm">
-                <div class="grid grid-cols-[120px_1fr] gap-2">
+                <div class="grid grid-cols-[120px_1fr] gap-2 text-sm">
                   <p class="text-gray-500">Lançamento:</p>
                   <p class="font-medium text-gray-100">{{ releaseDateText }}</p>
                 </div>
+
+                <div class="flex flex-wrap gap-2">
+                  <UBadge v-for="tag in topTags" :key="tag" color="gray" variant="soft">{{ tag }}</UBadge>
+                </div>
               </div>
 
-              <div class="flex flex-wrap gap-2">
-                <UBadge v-for="tag in topTags" :key="tag" color="gray" variant="soft">{{ tag }}</UBadge>
-              </div>
+              <GameBuyBox :offers="offers" />
             </aside>
           </div>
         </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-3 rounded-xl border border-white/10 bg-gray-900/60 p-4">
+  <div class="space-y-3 rounded-xl border border-[#66c0f4]/30 bg-gray-900/70 p-4 shadow-lg shadow-black/30 backdrop-blur-md">
     <template v-if="best">
       <div class="flex items-center justify-between gap-2">
         <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Melhor preço agora</p>
@@ -13,7 +13,7 @@
 
       <p class="text-sm text-gray-300">
         na <strong class="text-white">{{ best.store }}</strong>
-        <template v-if="activationText(best.activation)"> · {{ activationText(best.activation).toLowerCase() }}</template>
+        <template v-if="activationText(best.activation)"> · {{ lowerFirst(activationText(best.activation)) }}</template>
       </p>
 
       <span v-if="best.isHistoryLow" class="inline-block rounded-full bg-sky-500 px-2.5 py-0.5 text-xs font-semibold text-white">
@@ -50,4 +50,7 @@ const props = defineProps<{
 }>()
 
 const best = computed(() => props.offers[0])
+
+// "Ativa na Steam" -> "ativa na Steam" mid-sentence, keeping the store name.
+const lowerFirst = (text: string): string => text.charAt(0).toLowerCase() + text.slice(1)
 </script>
