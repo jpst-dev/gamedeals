@@ -116,12 +116,10 @@ const router = useRouter()
 const toast = useToast()
 const { searchGameSuggestions, getGameInfo } = useGamesApi()
 const gamesStore = useGamesStore()
-// Favorites live in localStorage: count them only after hydration.
-const isMounted = ref(false)
-const favoritesCount = computed(() => (isMounted.value ? gamesStore.favorites.length : 0))
+const favoritesCount = computed(() => gamesStore.favorites.length)
 
 onMounted(() => {
-  isMounted.value = true
+  gamesStore.loadFavorites()
   void gamesStore.migrateLegacyFavorites(getGameInfo)
 })
 const runtimeConfig = useRuntimeConfig()

@@ -260,3 +260,14 @@ describe('getPrices shop details', () => {
     expect(rows.map((row) => [row.shopId, row.voucher])).toEqual([[61, 'GAMES10'], [35, undefined]])
   })
 })
+
+describe('getGameInfo slug', () => {
+  it('keeps the ITAD slug so links resolve exactly', async () => {
+    const fetchMock = vi.fn(async () => ({ id: 'g-1', slug: 'baldurs-gate-3', title: "Baldur's Gate 3", assets: {} }))
+    setupComposableGlobals(fetchMock)
+
+    const api = await loadApi()
+
+    expect((await api.getGameInfo('g-1')).slug).toBe('baldurs-gate-3')
+  })
+})

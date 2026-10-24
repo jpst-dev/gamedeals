@@ -37,6 +37,7 @@ export type PriceRow = {
 
 export type GameInfo = {
   id: string
+  slug: string
   title: string
   image: string
   appid?: number
@@ -240,6 +241,7 @@ export const useGamesApi = () => {
       : ''
     return {
       id: String(entry.id ?? gameId),
+      slug: String(entry.slug ?? '') || slugify(String(entry.title ?? entry.name ?? '')),
       title: String(entry.title ?? entry.name ?? 'Unknown game'),
       image: String(assets.boxart ?? assets.banner300 ?? assets.banner400 ?? steamHeader),
       appid,

@@ -64,5 +64,7 @@ export const buildProductJsonLd = (input: {
 // Titles and descriptions come from ITAD; escape "<" and ">" so the JSON can
 // never close the surrounding <script> tag.
 export const serializeJsonLd = (data: Record<string, unknown>): string => {
-  return JSON.stringify(data).replace(/</g, '\u003c').replace(/>/g, '\u003e')
+  // Built from parts: a literal unicode escape here is too easy to lose in an edit.
+  const escape = (char: string): string => '\\' + 'u' + char.charCodeAt(0).toString(16).padStart(4, '0')
+  return JSON.stringify(data).replace(/[<>]/g, escape)
 }

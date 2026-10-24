@@ -103,4 +103,10 @@ describe('server/utils/home', () => {
 
     expect(home.hero.map((item) => item.appid)).toEqual([107, 100, 101, 103, 104])
   })
+
+  it('fails instead of returning an empty home when every shelf fails, so it is not cached', async () => {
+    const { buildHome } = await loadHome()
+    const fetcher = vi.fn().mockRejectedValue(new Error('ITAD down'))
+    await expect(buildHome(fetcher as never)).rejects.toThrow()
+  })
 })

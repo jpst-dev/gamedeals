@@ -41,6 +41,11 @@ const buildShelves = async (fetcher: ItadFetcher, now: number): Promise<HomePayl
     return fetchDealsPage(query, fetcher, now)
   }))
 
+  // A full ITAD outage must fail the request: an empty home would be cached.
+  if (results.every((result) => result.status === 'rejected')) {
+    throw createError({ statusCode: 502, statusMessage: 'Ofertas indisponíveis no momento' })
+  }
+
   return SHELVES.flatMap((shelf, index) => {
     const result = results[index]
     if (result?.status !== 'fulfilled' || result.value.list.length === 0) {

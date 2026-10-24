@@ -24,7 +24,7 @@
       @clear="clearFilters"
     />
 
-    <div v-if="pending && loadedGames.length === 0" :class="GRID_CLASS">
+    <div v-if="isStale || (pending && loadedGames.length === 0)" :class="GRID_CLASS" aria-busy="true">
       <div v-for="index in 8" :key="index" class="aspect-[2/3] animate-pulse rounded-xl bg-gray-800/60" />
     </div>
 
@@ -174,15 +174,26 @@ const autoLoadedBatches = ref(0)
 const canAutoLoadMore = computed(() => autoLoadedBatches.value < MAX_AUTO_LOAD_BATCHES)
 let lastAutoLoadAt = 0
 
-watch(data, (page) => {
+// While a new filter loads, useAsyncData still exposes the previous data, so
+// remember which state the grid belongs to and show the skeleton until the
+// current one arrives (this also keeps "Carregar mais" off the old offsets).
+const stateKey = computed(() => JSON.stringify(state.value))
+const loadedKey = ref('')
+const isStale = computed(() => loadedKey.value !== stateKey.value)
+
+watch([data, pending], ([page, isPending]) => {
+  if (isPending) {
+    return
+  }
   loadedGames.value = page?.games ?? []
   hasMore.value = Boolean(page?.hasMore)
   nextOffset.value = page?.nextOffset ?? 0
   autoLoadedBatches.value = 0
+  loadedKey.value = stateKey.value
 }, { immediate: true })
 
 const loadMore = async (mode: 'manual' | 'auto'): Promise<void> => {
-  if (isLoadingMore.value || !hasMore.value) {
+  if (isLoadingMore.value || !hasMore.value || isStale.value) {
     return
   }
 
@@ -196,10 +207,10 @@ const loadMore = async (mode: 'manual' | 'auto'): Promise<void> => {
   }
 
   isLoadingMore.value = true
-  const requestedState = state.value
+  const requestedKey = stateKey.value
   try {
-    const page = await getDealsPage(requestedState, nextOffset.value)
-    if (requestedState !== state.value) {
+    const page = await getDealsPage(state.value, nextOffset.value)
+    if (requestedKey !== stateKey.value || requestedKey !== loadedKey.value) {
       return
     }
 

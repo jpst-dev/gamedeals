@@ -40,6 +40,9 @@ describe('utils/seo', () => {
 
   it('escapes markup-breaking characters when serialized for a script tag', async () => {
     const { serializeJsonLd } = await import('../../utils/seo')
-    expect(serializeJsonLd({ name: '</script><b>' })).toBe('{"name":"\u003c/script\u003e\u003cb\u003e"}')
+    const json = serializeJsonLd({ name: '</script><b>' })
+    expect(json).not.toMatch(/[<>]/)
+    expect(json).toContain('\\' + 'u003c/script')
+    expect(JSON.parse(json)).toEqual({ name: '</script><b>' })
   })
 })

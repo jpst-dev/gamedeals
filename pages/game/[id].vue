@@ -241,8 +241,11 @@ const errorMessage = computed(() => {
 
 const seoTitle = computed(() => buildGameSeoTitle(gameInfo.value?.title ?? 'Jogo', offers.value))
 const seoDescription = computed(() => buildGameSeoDescription(gameInfo.value?.title ?? 'este jogo', offers.value))
-// Canonical uses the slug being visited: links across the site use the same ITAD slug.
-const canonicalUrl = computed(() => `${runtimeConfig.public.siteUrl}/game/${String(route.params.id ?? '').toLowerCase()}`)
+// ITAD's slug is the one every link uses; the visited param is only a fallback.
+const canonicalUrl = computed(() => {
+  const slug = gameInfo.value?.slug || String(route.params.id ?? '').toLowerCase()
+  return `${runtimeConfig.public.siteUrl}/game/${slug}`
+})
 const ogImage = computed(() => {
   return sidebarHeaderImage.value === fallbackCover ? `${runtimeConfig.public.siteUrl}/og-default.png` : sidebarHeaderImage.value
 })
