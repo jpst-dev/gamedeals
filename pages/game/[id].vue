@@ -32,7 +32,7 @@
             <aside class="min-w-0 space-y-4 rounded-xl border border-white/10 bg-gray-900/45 p-4 backdrop-blur-md">
               <img
                 :src="sidebarHeaderImage"
-                :alt="`Header image for ${gameInfo?.title ?? 'game'}`"
+                :alt="`Imagem de ${gameInfo?.title ?? 'jogo'}`"
                 class="h-auto w-full rounded-lg"
               >
 
@@ -42,19 +42,25 @@
 
               <div class="space-y-2 text-sm">
                 <div class="grid grid-cols-[120px_1fr] gap-2">
-                  <p class="text-gray-500">Ativacao:</p>
-                  <p class="font-medium text-gray-100">{{ topOffer?.activation || 'DRM nao informado' }}</p>
+                  <p class="text-gray-500">Ativação:</p>
+                  <p class="font-medium text-gray-100">{{ topOffer?.activation || 'DRM não informado' }}</p>
                 </div>
                 <div class="grid grid-cols-[120px_1fr] gap-2">
-                  <p class="text-gray-500">Regiao:</p>
-                  <p class="font-medium text-gray-100">{{ topOffer?.region || 'Global' }}</p>
+                  <p class="text-gray-500">Melhor preço:</p>
+                  <p class="font-semibold text-green-300">
+                    {{ topOffer ? formatCurrency(topOffer.price) : 'Sem ofertas' }}
+                    <span v-if="topOffer" class="text-xs font-normal text-gray-400">em {{ topOffer.store }}</span>
+                  </p>
+                </div>
+                <div v-if="historyLowPrice" class="grid grid-cols-[120px_1fr] gap-2">
+                  <p class="text-gray-500">Mínima histórica:</p>
+                  <p class="font-medium text-gray-100">
+                    {{ formatCurrency(historyLowPrice) }}
+                    <UBadge v-if="isAtHistoryLow" color="green" variant="soft" size="xs">menor preço já visto</UBadge>
+                  </p>
                 </div>
                 <div class="grid grid-cols-[120px_1fr] gap-2">
-                  <p class="text-gray-500">Melhor preco:</p>
-                  <p class="font-semibold text-green-300">{{ formatCurrency(topOffer?.price ?? 0) }}</p>
-                </div>
-                <div class="grid grid-cols-[120px_1fr] gap-2">
-                  <p class="text-gray-500">Lancamento:</p>
+                  <p class="text-gray-500">Lançamento:</p>
                   <p class="font-medium text-gray-100">{{ releaseDateText }}</p>
                 </div>
               </div>
@@ -67,22 +73,22 @@
         </div>
 
         <div class="space-y-3">
-          <h2 class="text-xl font-semibold text-white">Tabela de precos</h2>
+          <h2 class="text-xl font-semibold text-white">Tabela de preços</h2>
           <PriceTable :rows="priceRows" />
         </div>
 
         <div class="grid gap-6 lg:grid-cols-2">
           <div class="space-y-3">
-            <h2 class="text-xl font-semibold text-white">Historico de precos</h2>
+            <h2 class="text-xl font-semibold text-white">Histórico de preços</h2>
             <PriceHistoryChart
-              :points="priceHistoryPoints"
-              :comparison-price="topOffer?.regularPrice"
-              comparison-label="preco original"
+              :history="priceHistory"
+              :current-price="topOffer?.price"
+              :regular-price="topOffer?.regularPrice"
             />
           </div>
 
           <div class="space-y-3">
-            <h2 class="text-xl font-semibold text-white">Avaliacoes e metadados</h2>
+            <h2 class="text-xl font-semibold text-white">Avaliações e metadados</h2>
             <div class="space-y-3 rounded-xl border border-white/10 bg-gray-900/45 p-4 backdrop-blur-md">
               <div v-if="gameInfo?.reviewStats.length" class="space-y-2">
                 <div
@@ -94,7 +100,7 @@
                   <span class="font-semibold text-gray-100">{{ review.score }} ({{ review.count }})</span>
                 </div>
               </div>
-              <p v-else class="text-sm text-gray-400">Sem reviews agregados disponiveis no momento.</p>
+              <p v-else class="text-sm text-gray-400">Sem avaliações agregadas disponíveis no momento.</p>
 
               <div class="space-y-1 text-sm text-gray-300">
                 <p><span class="text-gray-500">Developers:</span> {{ gameInfo?.developers.join(', ') || 'N/A' }}</p>
@@ -109,11 +115,11 @@
 </template>
 
 <script setup lang="ts">
-import type { GameInfo, GameMedia, PriceRow } from '~/composables/useGamesApi'
+import type { GameInfo, GameMedia, PriceHistoryPoint, PriceRow } from '~/composables/useGamesApi'
 
 const route = useRoute()
 const toast = useToast()
-const { getGameInfo, getPrices, getGameIdBySlug, getGameMedia } = useGamesApi()
+const { getGameInfo, getPrices, getPriceHistory, getGameIdBySlug, getGameMedia } = useGamesApi()
 const runtimeConfig = useRuntimeConfig()
 const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
 const fallbackCover = 'https://placehold.co/600x300/111827/e5e7eb?text=No+Image'
@@ -128,32 +134,52 @@ const {
   data: gamePayload,
   pending,
   error
-} = await useAsyncData<{ gameInfo: GameInfo; prices: PriceRow[]; gameMedia: GameMedia }>(
+} = await useAsyncData<{
+  gameInfo: GameInfo
+  prices: PriceRow[]
+  priceHistory: PriceHistoryPoint[]
+  gameMedia: GameMedia
+}>(
   () => `game-detail-${String(route.params.id ?? '')}`,
   async () => {
     const routeParam = String(route.params.id ?? '').trim()
     const resolvedGameId = gameId.value || await getGameIdBySlug(routeParam)
-    const [gameInfo, prices] = await Promise.all([
+    const emptyMedia: GameMedia = { shortDescription: '', screenshots: [], videos: [] }
+    const [gameInfo, prices, priceHistory] = await Promise.all([
       getGameInfo(resolvedGameId),
-      getPrices(resolvedGameId)
+      getPrices(resolvedGameId),
+      // History and media are secondary: never fail the whole page because of them.
+      getPriceHistory(resolvedGameId).catch(() => [])
     ])
 
     const gameMedia = gameInfo.appid
-      ? await getGameMedia(gameInfo.appid)
-      : { shortDescription: '', screenshots: [], videos: [] }
+      ? await getGameMedia(gameInfo.appid).catch(() => emptyMedia)
+      : emptyMedia
 
-    return { gameInfo, prices, gameMedia }
+    return { gameInfo, prices, priceHistory, gameMedia }
   }
 )
 
 const gameInfo = computed(() => gamePayload.value?.gameInfo)
 const priceRows = computed(() => gamePayload.value?.prices ?? [])
+const priceHistory = computed(() => gamePayload.value?.priceHistory ?? [])
 const gameMedia = computed<GameMedia>(() => gamePayload.value?.gameMedia ?? { shortDescription: '', screenshots: [], videos: [] })
-const topOffer = computed(() => priceRows.value[0])
+const topOffer = computed(() => {
+  return priceRows.value.reduce<PriceRow | undefined>((best, row) => {
+    return !best || row.price < best.price ? row : best
+  }, undefined)
+})
+const historyLowPrice = computed(() => {
+  const lows = priceRows.value.map((row) => row.historyLow ?? 0).filter((value) => value > 0)
+  return lows.length > 0 ? Math.min(...lows) : 0
+})
+const isAtHistoryLow = computed(() => {
+  return Boolean(topOffer.value && historyLowPrice.value > 0 && topOffer.value.price <= historyLowPrice.value)
+})
 const topTags = computed(() => gameInfo.value?.tags.slice(0, 6) ?? [])
 const releaseDateText = computed(() => {
   if (!gameInfo.value?.releaseDate) {
-    return 'Nao informado'
+    return 'Não informado'
   }
 
   const parsedDate = new Date(gameInfo.value.releaseDate)
@@ -172,9 +198,7 @@ const gameDescription = computed(() => {
     return gameInfo.value.description
   }
 
-  const activationText = topOffer.value?.activation || 'DRM'
-  const regionText = topOffer.value?.region || 'Global'
-  return `Esta oferta e uma chave digital para ativacao em ${activationText}, com cobertura de regiao ${regionText}. A comparacao abaixo mostra diferentes lojas, descontos e links para compra com entrega digital.`
+  return 'Compare abaixo os preços deste jogo nas principais lojas digitais, com descontos, tipo de ativação e links para compra.'
 })
 
 const sidebarHeaderImage = computed(() => {
@@ -198,19 +222,6 @@ const heroBackdropImage = computed(() => {
 const heroBackdropStyle = computed(() => ({
   backgroundImage: `url('${heroBackdropImage.value}')`
 }))
-
-const priceHistoryPoints = computed(() => {
-  const current = topOffer.value?.price ?? 0
-  const storeLow = topOffer.value?.storeLow ?? current
-  const rawHistoryLow = topOffer.value?.historyLow ?? storeLow
-  const historyLow = rawHistoryLow > 0 ? rawHistoryLow : Math.min(storeLow, current)
-
-  return [
-    { label: 'Historico low', value: historyLow },
-    { label: 'Store low', value: storeLow },
-    { label: 'Atual', value: current }
-  ]
-})
 
 type MediaItem = {
   key: string
@@ -252,7 +263,7 @@ const mediaItems = computed<MediaItem[]>(() => {
 })
 
 const errorMessage = computed(() => {
-  return error.value ? 'Nao foi possivel carregar os dados deste jogo.' : ''
+  return error.value ? 'Não foi possível carregar os dados deste jogo.' : ''
 })
 
 const formatCurrency = (value: number): string => {
@@ -267,7 +278,7 @@ useHead({
   meta: [
     {
       name: 'description',
-      content: 'Compare precos por loja e veja historico de valores de jogos para PC.'
+      content: 'Compare preços por loja e veja o histórico de valores de jogos para PC.'
     },
     { property: 'og:title', content: computed(() => gameInfo.value?.title ?? appName.value) }
   ]
@@ -279,7 +290,7 @@ watch(
     if (value) {
       toast.add({
         title: 'Erro ao carregar jogo',
-        description: 'Nao foi possivel carregar detalhes e precos.',
+        description: 'Não foi possível carregar detalhes e preços.',
         color: 'red'
       })
     }

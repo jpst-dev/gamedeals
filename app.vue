@@ -6,21 +6,21 @@
           <NuxtLink
             to="/"
             class="text-lg font-semibold text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
-            aria-label="Go to home page"
+            aria-label="Ir para a página inicial"
           >
             {{ appName }}
           </NuxtLink>
 
           <div ref="searchContainerRef" class="relative w-full sm:w-80">
             <form @submit.prevent="handleSearchSubmit">
-              <label for="global-search" class="sr-only">Search game by name</label>
+              <label for="global-search" class="sr-only">Buscar jogo pelo nome</label>
               <UInput
                 id="global-search"
                 v-model="searchValue"
                 icon="i-heroicons-magnifying-glass"
                 placeholder="Buscar jogo..."
                 autocomplete="off"
-                aria-label="Search game by name"
+                aria-label="Buscar jogo pelo nome"
                 @focus="handleSearchFocus"
                 @blur="handleSearchBlur"
                 @keydown.down.prevent="moveHighlightedSuggestion(1)"
@@ -49,7 +49,7 @@
               >
                 <img
                   :src="suggestion.image || fallbackCover"
-                  :alt="`Cover image for ${suggestion.title}`"
+                  :alt="`Capa de ${suggestion.title}`"
                   class="h-10 w-7 rounded object-cover"
                   loading="lazy"
                 >
@@ -75,7 +75,7 @@
 
       <footer class="border-t border-gray-800 py-4 text-center text-sm text-gray-400">
         <UContainer>
-          <p>Dados de preco fornecidos por IsThereAnyDeal.</p>
+          <p>Dados de preço fornecidos por IsThereAnyDeal.</p>
         </UContainer>
       </footer>
       <UNotifications />
@@ -124,7 +124,7 @@ const runSearch = async (): Promise<void> => {
   } catch {
     toast.add({
       title: 'Erro ao buscar',
-      description: 'Nao foi possivel abrir os resultados.',
+      description: 'Não foi possível abrir os resultados.',
       color: 'red'
     })
   }
@@ -181,7 +181,7 @@ const selectSuggestion = async (suggestion: GameSuggestion): Promise<void> => {
   } catch {
     toast.add({
       title: 'Erro ao abrir jogo',
-      description: 'Nao foi possivel abrir os detalhes do jogo.',
+      description: 'Não foi possível abrir os detalhes do jogo.',
       color: 'red'
     })
   }

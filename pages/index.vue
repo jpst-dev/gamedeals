@@ -3,7 +3,7 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 class="text-2xl font-bold text-white">Top ofertas de jogos para PC</h1>
-        <p class="text-sm text-gray-400">Compare as melhores ofertas atuais em multiplas lojas digitais.</p>
+        <p class="text-sm text-gray-400">Compare as melhores ofertas atuais em múltiplas lojas digitais.</p>
       </div>
       <div class="flex items-center gap-3">
         <UButton
@@ -58,7 +58,7 @@
                   size="xs"
                   variant="ghost"
                   color="gray"
-                  aria-label="Clear all filters"
+                  aria-label="Limpar todos os filtros"
                   @click="resetFilters"
                 >
                   Limpar
@@ -67,7 +67,7 @@
 
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
-                  <label for="filter-min-discount-mobile" class="text-xs text-gray-400">Desconto minimo</label>
+                  <label for="filter-min-discount-mobile" class="text-xs text-gray-400">Desconto mínimo</label>
                   <span class="text-xs font-medium text-primary-300">{{ filters.minDiscount }}%</span>
                 </div>
                 <input
@@ -78,13 +78,13 @@
                   max="95"
                   step="5"
                   class="w-full accent-primary-500"
-                  aria-label="Minimum discount percentage"
+                  aria-label="Desconto mínimo em porcentagem"
                 >
               </div>
 
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
-                  <label for="filter-max-price-mobile" class="text-xs text-gray-400">Preco maximo</label>
+                  <label for="filter-max-price-mobile" class="text-xs text-gray-400">Preço máximo</label>
                   <span class="text-xs font-medium text-primary-300">
                     {{ filters.priceCapEnabled ? formatCurrency(filters.maxPrice) : 'Sem limite' }}
                   </span>
@@ -98,22 +98,22 @@
                   step="5"
                   class="w-full accent-primary-500"
                   :disabled="!filters.priceCapEnabled"
-                  aria-label="Maximum price cap"
+                  aria-label="Preço máximo"
                 >
                 <UCheckbox
                   v-model="filters.priceCapEnabled"
                   name="priceCapEnabledMobile"
-                  label="Ativar limite de preco"
+                  label="Ativar limite de preço"
                 />
               </div>
 
               <div class="space-y-1">
-                <label class="text-xs text-gray-400" for="filter-title-mobile">Pesquisar titulo carregado</label>
+                <label class="text-xs text-gray-400" for="filter-title-mobile">Pesquisar título carregado</label>
                 <UInput
                   id="filter-title-mobile"
                   v-model="filters.titleQuery"
                   placeholder="Ex.: cyberpunk"
-                  aria-label="Filter by loaded title"
+                  aria-label="Filtrar por título carregado"
                 />
               </div>
 
@@ -123,22 +123,22 @@
                   id="filter-store-mobile"
                   v-model="filters.store"
                   class="w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-primary-400 focus:outline-none"
-                  aria-label="Store filter"
+                  aria-label="Filtrar por loja"
                 >
                   <option value="">Todas</option>
-                  <option v-for="store in availableStores" :key="`mobile-${store}`" :value="store.toLowerCase()">
-                    {{ store }}
+                  <option v-for="shop in shops" :key="`mobile-${shop.id}`" :value="String(shop.id)">
+                    {{ shop.title }}
                   </option>
                 </select>
               </div>
 
               <div class="space-y-1">
-                <label class="text-xs text-gray-400" for="filter-activation-mobile">Ativacao</label>
+                <label class="text-xs text-gray-400" for="filter-activation-mobile">Ativação</label>
                 <select
                   id="filter-activation-mobile"
                   v-model="filters.activation"
                   class="w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-primary-400 focus:outline-none"
-                  aria-label="Activation filter"
+                  aria-label="Filtrar por ativação"
                 >
                   <option value="">Todas</option>
                   <option value="steam">Steam</option>
@@ -153,7 +153,7 @@
                   id="filter-platform-mobile"
                   v-model="filters.platform"
                   class="w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-primary-400 focus:outline-none"
-                  aria-label="Platform filter"
+                  aria-label="Filtrar por plataforma"
                 >
                   <option value="">Todas</option>
                   <option value="windows">Windows</option>
@@ -189,7 +189,7 @@
               size="xs"
               variant="ghost"
               color="gray"
-              aria-label="Clear all filters"
+              aria-label="Limpar todos os filtros"
               @click="resetFilters"
             >
               Limpar
@@ -198,7 +198,7 @@
 
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <label for="filter-min-discount" class="text-xs text-gray-400">Desconto minimo</label>
+              <label for="filter-min-discount" class="text-xs text-gray-400">Desconto mínimo</label>
               <span class="text-xs font-medium text-primary-300">{{ filters.minDiscount }}%</span>
             </div>
             <input
@@ -209,13 +209,13 @@
               max="95"
               step="5"
               class="w-full accent-primary-500"
-              aria-label="Minimum discount percentage"
+              aria-label="Desconto mínimo em porcentagem"
             >
           </div>
 
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <label for="filter-max-price" class="text-xs text-gray-400">Preco maximo</label>
+              <label for="filter-max-price" class="text-xs text-gray-400">Preço máximo</label>
               <span class="text-xs font-medium text-primary-300">
                 {{ filters.priceCapEnabled ? formatCurrency(filters.maxPrice) : 'Sem limite' }}
               </span>
@@ -229,22 +229,22 @@
               step="5"
               class="w-full accent-primary-500"
               :disabled="!filters.priceCapEnabled"
-              aria-label="Maximum price cap"
+              aria-label="Preço máximo"
             >
             <UCheckbox
               v-model="filters.priceCapEnabled"
               name="priceCapEnabled"
-              label="Ativar limite de preco"
+              label="Ativar limite de preço"
             />
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs text-gray-400" for="filter-title">Pesquisar titulo carregado</label>
+            <label class="text-xs text-gray-400" for="filter-title">Pesquisar título carregado</label>
             <UInput
               id="filter-title"
               v-model="filters.titleQuery"
               placeholder="Ex.: cyberpunk"
-              aria-label="Filter by loaded title"
+              aria-label="Filtrar por título carregado"
             />
           </div>
 
@@ -254,22 +254,22 @@
               id="filter-store"
               v-model="filters.store"
               class="w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-primary-400 focus:outline-none"
-              aria-label="Store filter"
+              aria-label="Filtrar por loja"
             >
               <option value="">Todas</option>
-              <option v-for="store in availableStores" :key="store" :value="store.toLowerCase()">
-                {{ store }}
+              <option v-for="shop in shops" :key="shop.id" :value="String(shop.id)">
+                {{ shop.title }}
               </option>
             </select>
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs text-gray-400" for="filter-activation">Ativacao</label>
+            <label class="text-xs text-gray-400" for="filter-activation">Ativação</label>
             <select
               id="filter-activation"
               v-model="filters.activation"
               class="w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-primary-400 focus:outline-none"
-              aria-label="Activation filter"
+              aria-label="Filtrar por ativação"
             >
               <option value="">Todas</option>
               <option value="steam">Steam</option>
@@ -284,7 +284,7 @@
               id="filter-platform"
               v-model="filters.platform"
               class="w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-primary-400 focus:outline-none"
-              aria-label="Platform filter"
+              aria-label="Filtrar por plataforma"
             >
               <option value="">Todas</option>
               <option value="windows">Windows</option>
@@ -301,7 +301,7 @@
         </div>
 
         <p class="text-xs text-gray-500">
-          Filtros aplicados apenas aos jogos ja carregados.
+          Loja e desconto mínimo valem para o catálogo inteiro; os demais filtros refinam os jogos já carregados.
         </p>
       </aside>
 
@@ -314,7 +314,7 @@
               id="quick-filter-platform"
               v-model="filters.platform"
               class="rounded-md border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-100 focus:border-primary-400 focus:outline-none"
-              aria-label="Quick platform filter"
+              aria-label="Filtrar por plataforma"
             >
               <option value="">Todas</option>
               <option value="windows">Windows</option>
@@ -322,12 +322,12 @@
               <option value="linux">Linux</option>
             </select>
 
-            <label for="quick-filter-activation" class="text-xs text-gray-400">Ativacao</label>
+            <label for="quick-filter-activation" class="text-xs text-gray-400">Ativação</label>
             <select
               id="quick-filter-activation"
               v-model="filters.activation"
               class="rounded-md border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-100 focus:border-primary-400 focus:outline-none"
-              aria-label="Quick activation filter"
+              aria-label="Filtrar por ativação"
             >
               <option value="">Todas</option>
               <option value="steam">Steam</option>
@@ -338,12 +338,12 @@
             </div>
 
             <div class="flex items-center gap-2 lg:justify-end">
-              <label for="quick-sort-by" class="text-xs text-gray-400">Sort by</label>
+              <label for="quick-sort-by" class="text-xs text-gray-400">Ordenar por</label>
               <select
                 id="quick-sort-by"
                 :value="currentSort"
                 class="rounded-md border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-100 focus:border-primary-400 focus:outline-none"
-                aria-label="Sort game list"
+                aria-label="Ordenar lista de jogos"
                 @change="changeSort(($event.target as HTMLSelectElement).value)"
               >
                 <option v-for="option in sortOptions" :key="option.value" :value="option.value">
@@ -411,7 +411,7 @@
             variant="outline"
             :loading="isLoadingMore"
             :disabled="isLoadingMore || pending || !hasMorePages"
-            aria-label="Load more games"
+            aria-label="Carregar mais jogos"
             @click="loadMoreGames"
           >
             {{ hasMorePages ? 'Carregar mais' : 'Todos os jogos carregados' }}
@@ -426,7 +426,7 @@
       color="primary"
       icon="i-heroicons-arrow-up-20-solid"
       class="fixed bottom-5 right-5 z-40 shadow-lg"
-      aria-label="Back to top"
+      aria-label="Voltar ao topo"
       @click="scrollToTop"
     >
       Topo
@@ -435,23 +435,23 @@
 </template>
 
 <script setup lang="ts">
-import type { Game, TopGamesPageResult } from '~/composables/useGamesApi'
+import type { Game, Shop, TopGamesFilters, TopGamesPageResult } from '~/composables/useGamesApi'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const gamesStore = useGamesStore()
-const { getTopGames } = useGamesApi()
+const { getTopGames, getShops } = useGamesApi()
 const runtimeConfig = useRuntimeConfig()
 const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
 const perPage = 20
 const sortOptions = [
   { value: 'hottest-games', label: 'Mais populares' },
   { value: 'highest-cut', label: 'Maior desconto' },
-  { value: 'lowest-price', label: 'Menor preco' },
-  { value: 'highest-price', label: 'Maior preco' },
+  { value: 'lowest-price', label: 'Menor preço' },
+  { value: 'highest-price', label: 'Maior preço' },
   { value: 'newest-deal', label: 'Mais recentes' },
-  { value: 'title-asc', label: 'Titulo A-Z' }
+  { value: 'title-asc', label: 'Título A-Z' }
 ] as const
 type SortOptionValue = (typeof sortOptions)[number]['value']
 type HomeDealFilters = {
@@ -492,21 +492,43 @@ const apiSortValue = computed(() => {
   if (currentSort.value === 'lowest-price') return 'price'
   if (currentSort.value === 'highest-price') return '-price'
   if (currentSort.value === 'newest-deal') return '-added'
+  if (currentSort.value === 'title-asc') return 'title'
   return '-hot'
+})
+
+// Store and minimum discount are applied by ITAD across the whole catalog;
+// the slider is debounced so dragging it doesn't fire one request per step.
+const debouncedMinDiscount = ref(filters.minDiscount)
+let minDiscountTimer: ReturnType<typeof setTimeout> | null = null
+watch(() => filters.minDiscount, (value) => {
+  if (minDiscountTimer) {
+    clearTimeout(minDiscountTimer)
+  }
+  minDiscountTimer = setTimeout(() => {
+    debouncedMinDiscount.value = value
+  }, 400)
+})
+const serverFilters = computed<TopGamesFilters>(() => ({
+  shops: filters.store ? [Number(filters.store)] : [],
+  minCut: debouncedMinDiscount.value
+}))
+
+const { data: shops } = await useAsyncData<Shop[]>('itad-shops', () => getShops().catch(() => []), {
+  default: () => []
 })
 
 useHead({
   title: computed(() => `${appName.value} | Ofertas em destaque`),
   meta: [
-    { name: 'description', content: 'Catalogo paginado de jogos para PC com melhores ofertas por loja.' },
+    { name: 'description', content: 'Catálogo paginado de jogos para PC com melhores ofertas por loja.' },
     { property: 'og:title', content: computed(() => `${appName.value} | Ofertas em destaque`) },
-    { property: 'og:description', content: 'Veja as melhores ofertas de jogos para PC em um so lugar.' }
+    { property: 'og:description', content: 'Veja as melhores ofertas de jogos para PC em um só lugar.' }
   ]
 })
 
 const { data, pending, error } = await useAsyncData<TopGamesPageResult>(
-  () => `top-games-home-${apiSortValue.value}`,
-  async () => getTopGames(perPage, apiSortValue.value, 1)
+  () => `top-games-home-${apiSortValue.value}-${filters.store}-${debouncedMinDiscount.value}`,
+  async () => getTopGames(perPage, apiSortValue.value, 1, serverFilters.value)
 )
 const loadedGames = ref<Game[]>([])
 const loadedPages = ref(1)
@@ -552,71 +574,29 @@ const dynamicPriceSliderMax = computed(() => {
   }, 100)
   return Math.max(100, Math.ceil(highestLoadedPrice / 50) * 50)
 })
-const availableStores = computed(() => {
-  const stores = new Set<string>()
-  loadedGames.value.forEach((game) => {
-    if (game.store) {
-      stores.add(game.store)
-    }
-  })
-  return Array.from(stores).sort((a, b) => a.localeCompare(b, 'pt-BR'))
-})
-
-const sortedGames = computed(() => {
-  const list = [...loadedGames.value]
-
-  if (currentSort.value === 'hottest-games') {
-    return list
-  }
-
-  if (currentSort.value === 'lowest-price') {
-    return list.sort((a, b) => (a.price[0]?.amount ?? 0) - (b.price[0]?.amount ?? 0))
-  }
-
-  if (currentSort.value === 'highest-price') {
-    return list.sort((a, b) => (b.price[0]?.amount ?? 0) - (a.price[0]?.amount ?? 0))
-  }
-
-  if (currentSort.value === 'newest-deal') {
-    return list.sort((a, b) => {
-      const timeA = new Date(a.dealTimestamp ?? 0).getTime()
-      const timeB = new Date(b.dealTimestamp ?? 0).getTime()
-      return timeB - timeA
-    })
-  }
-
-  if (currentSort.value === 'title-asc') {
-    return list.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR'))
-  }
-
-  return list.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0))
-})
+// Pages already come sorted (and filtered by store/discount) from ITAD, so the
+// remaining filters only refine what is loaded.
 const filteredGames = computed(() => {
-  return sortedGames.value.filter((game) => {
+  return loadedGames.value.filter((game) => {
     const price = game.price[0]?.amount ?? 0
     const discount = game.discount ?? 0
     const activation = (game.activation ?? '').toLowerCase()
     const platforms = (game.platforms ?? '').toLowerCase()
     const title = game.title.toLowerCase()
-    const store = (game.store ?? '').toLowerCase()
     const isFavorite = gamesStore.favorites.includes(game.id)
     const hasDiscount = discount > 0
 
-    const matchesMinDiscount = discount >= filters.minDiscount
     const matchesMaxPrice = !filters.priceCapEnabled || price <= filters.maxPrice
     const matchesActivation = !filters.activation || activation.includes(filters.activation.toLowerCase())
     const matchesPlatform = !filters.platform || platforms.includes(filters.platform.toLowerCase())
-    const matchesStore = !filters.store || store.includes(filters.store.toLowerCase())
     const matchesTitle = !filters.titleQuery || title.includes(filters.titleQuery.toLowerCase())
     const matchesExpiry = !filters.onlyWithExpiry || Boolean(game.expiryAt)
     const matchesFavorite = !filters.onlyFavorites || isFavorite
     const matchesDiscounted = !filters.onlyDiscounted || hasDiscount
 
-    return matchesMinDiscount
-      && matchesMaxPrice
+    return matchesMaxPrice
       && matchesActivation
       && matchesPlatform
-      && matchesStore
       && matchesTitle
       && matchesExpiry
       && matchesFavorite
@@ -697,7 +677,7 @@ const loadMoreGames = async (mode: 'manual' | 'auto' = 'manual'): Promise<void> 
   isLoadingMore.value = true
   try {
     const nextPage = loadedPages.value + 1
-    const nextBatch = await getTopGames(perPage, apiSortValue.value, nextPage)
+    const nextBatch = await getTopGames(perPage, apiSortValue.value, nextPage, serverFilters.value)
     const existingIds = new Set(loadedGames.value.map((game) => game.id))
     const uniqueGames = nextBatch.games.filter((game) => !existingIds.has(game.id))
 
@@ -732,7 +712,7 @@ const errorMessage = computed(() => {
     return ''
   }
 
-  return 'Nao foi possivel carregar os jogos agora.'
+  return 'Não foi possível carregar os jogos agora.'
 })
 
 watch(
@@ -740,7 +720,7 @@ watch(
   (value) => {
     if (value) {
       toast.add({
-        title: 'Erro ao carregar catalogo',
+        title: 'Erro ao carregar catálogo',
         description: 'Tente novamente em instantes.',
         color: 'red'
       })

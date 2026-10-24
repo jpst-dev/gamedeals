@@ -13,16 +13,16 @@
         type="number"
         min="0"
         step="1"
-        placeholder="Preco minimo"
-        aria-label="Minimum price filter"
+        placeholder="Preço mínimo"
+        aria-label="Preço mínimo"
       />
       <UInput
         v-model.number="maxPriceModel"
         type="number"
         min="0"
         step="1"
-        placeholder="Preco maximo"
-        aria-label="Maximum price filter"
+        placeholder="Preço máximo"
+        aria-label="Preço máximo"
       />
     </div>
 
@@ -68,7 +68,7 @@ const queryTerm = computed(() => {
 useHead({
   title: computed(() => `Busca por ${queryTerm.value || 'jogos'} | ${appName.value}`),
   meta: [
-    { name: 'description', content: 'Busque jogos para PC e compare precos por loja.' },
+    { name: 'description', content: 'Busque jogos para PC e compare preços por loja.' },
     { property: 'og:title', content: computed(() => `${appName.value} | Busca de jogos`) }
   ]
 })
@@ -86,7 +86,7 @@ const executeSearch = async (): Promise<void> => {
   } catch {
     toast.add({
       title: 'Erro na busca',
-      description: 'Nao foi possivel consultar os jogos.',
+      description: 'Não foi possível consultar os jogos.',
       color: 'red'
     })
     gamesStore.setSearchResults([])

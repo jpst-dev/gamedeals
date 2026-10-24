@@ -7,7 +7,7 @@
       <div class="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-gray-950 [clip-path:inset(0_round_0.75rem)] [contain:paint]">
         <img
           :src="game.image || fallbackCover"
-          :alt="`Cover image for ${game.title}`"
+          :alt="`Capa de ${game.title}`"
           class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 transform-gpu will-change-transform [backface-visibility:hidden] group-hover:scale-105 group-focus-within:scale-105"
           loading="lazy"
         >
@@ -41,7 +41,7 @@
             <div
               class="max-h-0 space-y-1 overflow-hidden text-xs text-gray-200/90 opacity-0 transition-all duration-300 group-hover:mt-2 group-hover:max-h-28 group-hover:opacity-100 group-focus-within:mt-2 group-focus-within:max-h-28 group-focus-within:opacity-100"
             >
-              <p v-if="game.activation">Ativacao: <span class="text-white">{{ game.activation }}</span></p>
+              <p v-if="game.activation">Ativação: <span class="text-white">{{ game.activation }}</span></p>
               <p v-if="game.platforms">Plataforma: <span class="text-white">{{ game.platforms }}</span></p>
               <p v-if="offerValidityLabel">Validade: <span class="text-yellow-300">{{ offerValidityLabel }}</span></p>
 

@@ -9,7 +9,6 @@ export type Game = {
   store?: string
   activation?: string
   platforms?: string
-  region?: string
   expiryAt?: string
   dealTimestamp?: string
 }
@@ -21,7 +20,6 @@ export type PriceRow = {
   discount: number
   activation: string
   platforms: string
-  region: string
   historyLow?: number
   storeLow?: number
   updatedAt?: string
@@ -57,15 +55,20 @@ export type GameMedia = {
   }>
 }
 
-type ProxyResponse<T> = {
-  data: T
-  warning?: string
-}
-
 export type TopGamesPageResult = {
   games: Game[]
   hasMore: boolean
   nextOffset: number
+}
+
+export type TopGamesFilters = {
+  shops?: number[]
+  minCut?: number
+}
+
+export type Shop = {
+  id: number
+  title: string
 }
 
 export type GameSuggestion = {
@@ -76,104 +79,134 @@ export type GameSuggestion = {
   type: string
 }
 
+export type PriceHistoryPoint = {
+  timestamp: string
+  price: number
+  shop: string
+}
+
+const slugify = (value: string): string => {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+const namesOf = (value: unknown): string => {
+  return (Array.isArray(value) ? value : [])
+    .map((entry) => String((entry as { name?: unknown }).name ?? ''))
+    .filter(Boolean)
+    .join(', ')
+}
+
+const asList = (value: unknown): unknown[] => {
+  if (Array.isArray(value)) {
+    return value
+  }
+
+  const results = (value as { results?: unknown } | null)?.results
+  return Array.isArray(results) ? results : []
+}
+
+const isComparableType = (item: Record<string, unknown>): boolean => {
+  const type = String(item.type ?? '')
+  return type === 'game' || type === 'dlc'
+}
+
 const normalizeGame = (item: Record<string, unknown>, fallbackIndex: number): Game => {
   const assets = (item.assets ?? {}) as Record<string, unknown>
-  const maybePrice = item.price
-  const priceArray = Array.isArray(maybePrice) ? maybePrice : []
-  const normalizedPrice = priceArray
-    .map((entry) => {
-      const amount = typeof (entry as { amount?: unknown }).amount === 'number'
-        ? (entry as { amount: number }).amount
-        : Number((entry as { amount?: string }).amount ?? 0)
-      return { amount: Number.isNaN(amount) ? 0 : amount }
-    })
-    .filter((entry) => entry.amount >= 0)
-
-  const rawSlug = String(item.slug ?? '')
-  const normalizedSlug = rawSlug
-    || String(item.title ?? item.name ?? `game-${fallbackIndex}`)
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
+  const title = String(item.title ?? item.name ?? `game-${fallbackIndex}`)
 
   return {
     id: String(item.id ?? `game-${fallbackIndex}`),
-    slug: normalizedSlug,
+    slug: String(item.slug ?? '') || slugify(title),
     title: String(item.title ?? item.name ?? 'Unknown game'),
-    image: String(item.image ?? item.thumb ?? assets.boxart ?? assets.banner300 ?? assets.banner400 ?? ''),
-    price: normalizedPrice.length > 0 ? normalizedPrice : [{ amount: 0 }]
+    image: String(assets.boxart ?? assets.banner300 ?? assets.banner400 ?? ''),
+    price: [{ amount: 0 }]
   }
 }
 
 const normalizeDealGame = (item: Record<string, unknown>, fallbackIndex: number): Game | null => {
-  const itemType = String(item.type ?? '')
-  const itemTitle = String(item.title ?? 'Unknown game')
-  const lowerTitle = itemTitle.toLowerCase()
-
-  // Keep the home focused on actual games and avoid bundle-heavy noise.
-  if (itemType !== 'game' || lowerTitle.includes('bundle')) {
+  if (String(item.type ?? '') !== 'game') {
     return null
   }
 
+  const itemTitle = String(item.title ?? 'Unknown game')
   const deal = (item.deal ?? {}) as Record<string, unknown>
   const dealPrice = (deal.price ?? {}) as Record<string, unknown>
   const regularPrice = (deal.regular ?? {}) as Record<string, unknown>
   const shop = (deal.shop ?? {}) as Record<string, unknown>
-  const drm = Array.isArray(deal.drm) ? deal.drm : []
-  const platforms = Array.isArray(deal.platforms) ? deal.platforms : []
   const amount = Number(dealPrice.amount ?? 0)
   const regularAmount = Number(regularPrice.amount ?? 0)
   const cut = Number(deal.cut ?? 0)
-  const timestamp = typeof deal.timestamp === 'string' ? deal.timestamp : undefined
-  const expiry = typeof deal.expiry === 'string' ? deal.expiry : undefined
   const assets = (item.assets ?? {}) as Record<string, unknown>
-  const rawSlug = String(item.slug ?? '')
-  const normalizedSlug = rawSlug
-    || itemTitle
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
 
   return {
     id: String(item.id ?? `deal-${fallbackIndex}`),
-    slug: normalizedSlug,
+    slug: String(item.slug ?? '') || slugify(itemTitle),
     title: itemTitle,
     image: String(assets.boxart ?? assets.banner300 ?? assets.banner400 ?? ''),
     price: [{ amount: Number.isFinite(amount) ? amount : 0 }],
     regularPrice: Number.isFinite(regularAmount) ? regularAmount : 0,
     discount: Number.isFinite(cut) ? cut : 0,
     store: String(shop.name ?? ''),
-    activation: drm
-      .map((entry) => String((entry as { name?: unknown }).name ?? ''))
-      .filter(Boolean)
-      .join(', '),
-    platforms: platforms
-      .map((entry) => String((entry as { name?: unknown }).name ?? ''))
-      .filter(Boolean)
-      .join(', '),
-    region: 'Global',
-    expiryAt: expiry,
-    dealTimestamp: timestamp
+    activation: namesOf(deal.drm),
+    platforms: namesOf(deal.platforms),
+    expiryAt: typeof deal.expiry === 'string' ? deal.expiry : undefined,
+    dealTimestamp: typeof deal.timestamp === 'string' ? deal.timestamp : undefined
   }
+}
+
+// ITAD history is a list of per-shop price changes. Replay it to get the
+// cheapest price available across all shops at each point in time.
+export const buildLowestPriceTimeline = (entries: unknown[]): PriceHistoryPoint[] => {
+  const changes = entries
+    .map((entry) => {
+      const row = entry as Record<string, unknown>
+      const shop = (row.shop ?? {}) as Record<string, unknown>
+      const deal = (row.deal ?? {}) as Record<string, unknown>
+      const price = Number(((deal.price ?? {}) as Record<string, unknown>).amount)
+      return {
+        timestamp: String(row.timestamp ?? ''),
+        time: new Date(String(row.timestamp ?? '')).getTime(),
+        shopId: String(shop.id ?? shop.name ?? ''),
+        shopName: String(shop.name ?? ''),
+        price
+      }
+    })
+    .filter((change) => Number.isFinite(change.time) && Number.isFinite(change.price))
+    .sort((a, b) => a.time - b.time)
+
+  const currentByShop = new Map<string, { price: number; shop: string }>()
+  const timeline: PriceHistoryPoint[] = []
+
+  for (const change of changes) {
+    currentByShop.set(change.shopId, { price: change.price, shop: change.shopName })
+    let cheapest = { price: Number.POSITIVE_INFINITY, shop: '' }
+    for (const value of currentByShop.values()) {
+      if (value.price < cheapest.price) {
+        cheapest = value
+      }
+    }
+
+    const previous = timeline[timeline.length - 1]
+    if (previous && previous.price === cheapest.price) {
+      continue
+    }
+
+    timeline.push({ timestamp: change.timestamp, price: cheapest.price, shop: cheapest.shop })
+  }
+
+  return timeline
 }
 
 export const useGamesApi = () => {
   const topGamesPageCache = useState<Record<string, TopGamesPageResult>>('top-games-page-cache', () => ({}))
 
   const getGameInfo = async (gameId: string): Promise<GameInfo> => {
-    const response = await $fetch<ProxyResponse<Record<string, unknown>>>('/api/itad-proxy', {
-      method: 'POST',
-      body: {
-        operation: 'info',
-        gameId
-      }
-    })
-
-    const entry = response.data ?? {}
+    const entry = await $fetch<Record<string, unknown>>(`/api/games/${encodeURIComponent(gameId)}`) ?? {}
     const assets = (entry.assets ?? {}) as Record<string, unknown>
     const appidRaw = Number(entry.appid)
     const appid = Number.isFinite(appidRaw) ? appidRaw : undefined
@@ -225,24 +258,16 @@ export const useGamesApi = () => {
       return new Map()
     }
 
-    const response = await $fetch<ProxyResponse<unknown>>('/api/itad-proxy', {
-      method: 'POST',
-      body: {
-        operation: 'prices',
-        gameIds,
-        onlyDeals: false
-      }
+    const response = await $fetch<unknown>('/api/games/prices', {
+      query: { ids: gameIds.join(',') }
     })
 
-    const entries = Array.isArray(response.data) ? response.data : []
     const pricesMap = new Map<string, number>()
-
-    for (const entry of entries) {
+    for (const entry of asList(response)) {
       const row = entry as Record<string, unknown>
       const deals = Array.isArray(row.deals) ? row.deals : []
       const bestDealPrice = deals.reduce<number>((bestPrice, currentDeal) => {
-        const deal = currentDeal as Record<string, unknown>
-        const priceNode = (deal.price ?? {}) as Record<string, unknown>
+        const priceNode = ((currentDeal as Record<string, unknown>).price ?? {}) as Record<string, unknown>
         const amount = Number(priceNode.amount ?? Number.POSITIVE_INFINITY)
         return amount < bestPrice ? amount : bestPrice
       }, Number.POSITIVE_INFINITY)
@@ -256,63 +281,24 @@ export const useGamesApi = () => {
   }
 
   const searchGames = async (query: string): Promise<Game[]> => {
-    const response = await $fetch<ProxyResponse<unknown>>('/api/itad-proxy', {
-      method: 'POST',
-      body: {
-        operation: 'search',
-        query,
-        limit: 50
-      }
+    const response = await $fetch<unknown>('/api/games/search', {
+      query: { q: query, limit: 50 }
     })
 
-    const resultList = Array.isArray(response.data)
-      ? response.data
-      : ((response.data as { results?: unknown[] })?.results ?? [])
+    const games = asList(response)
+      .map((item) => item as Record<string, unknown>)
+      .filter(isComparableType)
+      .map((item, index) => normalizeGame(item, index))
+      // Entries without cover are almost always obscure duplicates; skip them
+      // instead of firing one extra request per result to look for an image.
+      .filter((game) => Boolean(game.image))
 
-    const normalizedGames = resultList
-      .map((item, index) => normalizeGame(item as Record<string, unknown>, index))
-      .filter((item, index) => {
-        const source = resultList[index] as Record<string, unknown>
-        const type = String(source.type ?? '')
-        return type === 'game' || type === 'dlc'
-      })
-
-    const gameIds = normalizedGames.map((game) => game.id)
-    const pricesMap = await getBestPricesByGameId(gameIds)
-
-    const gamesWithPrices = normalizedGames.map((game) => ({
-      ...game,
-      price: [{ amount: pricesMap.get(game.id) ?? game.price[0]?.amount ?? 0 }]
-    }))
-
-    const missingImageGames = gamesWithPrices.filter((game) => !game.image)
-    if (missingImageGames.length === 0) {
-      return gamesWithPrices
-    }
-
-    // Some search entries come without assets; try filling cover from detailed info endpoint.
-    const imageEnrichmentResults = await Promise.allSettled(
-      missingImageGames.map((game) => getGameInfo(game.id))
-    )
-
-    const imageById = new Map<string, string>()
-    imageEnrichmentResults.forEach((result) => {
-      if (result.status === 'fulfilled' && result.value.image) {
-        imageById.set(result.value.id, result.value.image)
-      }
-    })
-
-    const enrichedGames = gamesWithPrices.map((game) => ({
-      ...game,
-      image: imageById.get(game.id) ?? game.image
-    }))
+    const pricesMap = await getBestPricesByGameId(games.map((game) => game.id))
 
     // Keep search grid focused on entries users can actually compare (cover + valid price).
-    return enrichedGames.filter((game) => {
-      const hasImage = Boolean(game.image)
-      const hasPrice = pricesMap.has(game.id)
-      return hasImage && hasPrice
-    })
+    return games
+      .filter((game) => pricesMap.has(game.id))
+      .map((game) => ({ ...game, price: [{ amount: pricesMap.get(game.id) ?? 0 }] }))
   }
 
   const searchGameSuggestions = async (query: string, limit = 8): Promise<GameSuggestion[]> => {
@@ -321,71 +307,56 @@ export const useGamesApi = () => {
       return []
     }
 
-    const response = await $fetch<ProxyResponse<unknown>>('/api/itad-proxy', {
-      method: 'POST',
-      body: {
-        operation: 'search',
-        query: cleanQuery,
-        limit: Math.min(Math.max(limit, 1), 20)
-      }
+    const response = await $fetch<unknown>('/api/games/search', {
+      query: { q: cleanQuery, limit: Math.min(Math.max(limit, 1), 20) }
     })
 
-    const resultList = Array.isArray(response.data)
-      ? response.data
-      : ((response.data as { results?: unknown[] })?.results ?? [])
-
-    return resultList
-      .map((entry, index) => {
-        const item = entry as Record<string, unknown>
-        const normalizedGame = normalizeGame(item, index)
-        const type = String(item.type ?? '')
-        return {
-          id: normalizedGame.id,
-          slug: normalizedGame.slug,
-          title: normalizedGame.title,
-          image: normalizedGame.image,
-          type
-        }
+    return asList(response)
+      .map((entry) => entry as Record<string, unknown>)
+      .filter(isComparableType)
+      .map((item, index) => {
+        const { id, slug, title, image } = normalizeGame(item, index)
+        return { id, slug, title, image, type: String(item.type ?? '') }
       })
-      .filter((entry) => entry.type === 'game' || entry.type === 'dlc')
   }
 
-  const getTopGames = async (limit = 50, sort = '-hot', page = 1): Promise<TopGamesPageResult> => {
+  const getTopGames = async (
+    limit = 50,
+    sort = '-hot',
+    page = 1,
+    filters: TopGamesFilters = {}
+  ): Promise<TopGamesPageResult> => {
     const safePage = Math.max(page, 1)
     const offset = (safePage - 1) * limit
-    const cacheKey = `${sort}:${limit}:${offset}`
+    const shops = [...(filters.shops ?? [])].sort((a, b) => a - b).join(',')
+    const minCut = filters.minCut && filters.minCut > 0 ? filters.minCut : undefined
+    const cacheKey = `${sort}:${limit}:${offset}:${shops}:${minCut ?? 0}`
 
     if (topGamesPageCache.value[cacheKey]) {
       return topGamesPageCache.value[cacheKey]
     }
 
-    const response = await $fetch<ProxyResponse<unknown>>('/api/itad-proxy', {
-      method: 'POST',
-      body: {
-        operation: 'top',
-        limit,
-        offset,
-        sort
-      }
+    const payload = await $fetch<{ list?: unknown[]; hasMore?: unknown; nextOffset?: unknown }>('/api/deals', {
+      query: { limit, offset, sort, shops: shops || undefined, minCut }
     })
 
-    const payload = response.data as { list?: unknown[]; hasMore?: unknown; nextOffset?: unknown } | unknown[]
-    const resultList = Array.isArray(payload)
-      ? payload
-      : (Array.isArray(payload?.list) ? payload.list : [])
-
-    const games = resultList
+    const games = (Array.isArray(payload?.list) ? payload.list : [])
       .map((item, index) => normalizeDealGame(item as Record<string, unknown>, index))
       .filter((item): item is Game => item !== null)
 
     const pageResult: TopGamesPageResult = {
       games,
-      hasMore: Array.isArray(payload) ? false : Boolean(payload?.hasMore),
-      nextOffset: Array.isArray(payload) ? offset + games.length : Number(payload?.nextOffset ?? offset + games.length)
+      hasMore: Boolean(payload?.hasMore),
+      nextOffset: Number(payload?.nextOffset ?? offset + games.length)
     }
 
     topGamesPageCache.value[cacheKey] = pageResult
     return pageResult
+  }
+
+  const getShops = async (): Promise<Shop[]> => {
+    const shops = await $fetch<Shop[]>('/api/shops')
+    return Array.isArray(shops) ? shops : []
   }
 
   const getGameIdBySlug = async (slug: string): Promise<string> => {
@@ -394,24 +365,24 @@ export const useGamesApi = () => {
       throw new Error('Slug is required.')
     }
 
-    const response = await $fetch<ProxyResponse<unknown>>('/api/itad-proxy', {
-      method: 'POST',
-      body: {
-        operation: 'search',
-        query: normalizedSlug.replace(/-/g, ' '),
-        limit: 100
-      }
+    const title = normalizedSlug.replace(/-/g, ' ')
+    const lookup = await $fetch<{ found?: boolean; game?: { id?: string; slug?: string } }>('/api/games/lookup', {
+      query: { title }
+    }).catch(() => null)
+
+    if (lookup?.found && lookup.game?.id && lookup.game.slug === normalizedSlug) {
+      return lookup.game.id
+    }
+
+    // Lookup matches by title; slugs with punctuation (e.g. "baldurs-gate-3") may
+    // not round-trip, so fall back to searching for an exact slug.
+    const response = await $fetch<unknown>('/api/games/search', {
+      query: { q: title, limit: 50 }
     })
 
-    const resultList = Array.isArray(response.data)
-      ? response.data
-      : ((response.data as { results?: unknown[] })?.results ?? [])
-
-    const exactMatch = resultList.find((entry) => {
+    const exactMatch = asList(response).find((entry) => {
       const row = entry as Record<string, unknown>
-      const rowSlug = String(row.slug ?? '').toLowerCase()
-      const rowType = String(row.type ?? '')
-      return rowSlug === normalizedSlug && (rowType === 'game' || rowType === 'dlc')
+      return String(row.slug ?? '').toLowerCase() === normalizedSlug && isComparableType(row)
     }) as Record<string, unknown> | undefined
 
     if (exactMatch?.id) {
@@ -422,50 +393,38 @@ export const useGamesApi = () => {
   }
 
   const getPrices = async (gameId: string): Promise<PriceRow[]> => {
-    const response = await $fetch<ProxyResponse<unknown>>('/api/itad-proxy', {
-      method: 'POST',
-      body: {
-        operation: 'prices',
-        gameId,
-        onlyDeals: false,
-        capacity: 30
-      }
-    })
-
-    const entries = Array.isArray(response.data) ? response.data : []
-    const firstEntry = (entries[0] ?? {}) as Record<string, unknown>
-    const deals = (firstEntry.deals ?? []) as unknown[]
+    const response = await $fetch<unknown>(`/api/games/${encodeURIComponent(gameId)}/prices`)
+    const firstEntry = (asList(response)[0] ?? {}) as Record<string, unknown>
+    const deals = Array.isArray(firstEntry.deals) ? firstEntry.deals : []
+    // The all-time low is reported once per game, not per deal.
+    const gameHistoryLow = ((firstEntry.historyLow ?? {}) as Record<string, unknown>).all as Record<string, unknown> | undefined
 
     return deals.map((entry) => {
       const deal = entry as Record<string, unknown>
       const shop = (deal.shop ?? {}) as Record<string, unknown>
       const price = (deal.price ?? {}) as Record<string, unknown>
       const regular = (deal.regular ?? {}) as Record<string, unknown>
-      const drm = Array.isArray(deal.drm) ? deal.drm : []
-      const platforms = Array.isArray(deal.platforms) ? deal.platforms : []
       const storeLow = (deal.storeLow ?? {}) as Record<string, unknown>
-      const historyLow = (deal.historyLow ?? {}) as Record<string, unknown>
+      const historyLow = (gameHistoryLow ?? {}) as Record<string, unknown>
 
       return {
-        store: String(shop.name ?? 'Unknown store'),
+        store: String(shop.name ?? 'Loja desconhecida'),
         price: Number(price.amount ?? 0),
         regularPrice: Number(regular.amount ?? 0),
         discount: Number(deal.cut ?? 0),
-        activation: drm
-          .map((item) => String((item as { name?: unknown }).name ?? ''))
-          .filter(Boolean)
-          .join(', ') || 'N/A',
-        platforms: platforms
-          .map((item) => String((item as { name?: unknown }).name ?? ''))
-          .filter(Boolean)
-          .join(', ') || 'N/A',
-        region: 'Global',
+        activation: namesOf(deal.drm) || 'N/A',
+        platforms: namesOf(deal.platforms) || 'N/A',
         historyLow: Number(historyLow.amount ?? 0),
         storeLow: Number(storeLow.amount ?? 0),
         updatedAt: typeof deal.timestamp === 'string' ? deal.timestamp : undefined,
         link: String(deal.url ?? '#')
       }
     })
+  }
+
+  const getPriceHistory = async (gameId: string): Promise<PriceHistoryPoint[]> => {
+    const response = await $fetch<unknown>(`/api/games/${encodeURIComponent(gameId)}/history`)
+    return buildLowestPriceTimeline(asList(response))
   }
 
   const getGameMedia = async (appid: number): Promise<GameMedia> => {
@@ -477,15 +436,7 @@ export const useGamesApi = () => {
       }
     }
 
-    const response = await $fetch<ProxyResponse<Record<string, unknown>>>('/api/itad-proxy', {
-      method: 'POST',
-      body: {
-        operation: 'steamMedia',
-        appid
-      }
-    })
-
-    const dataNode = response.data ?? {}
+    const dataNode = await $fetch<Record<string, unknown>>(`/api/steam/${appid}`) ?? {}
     const screenshotsNode = Array.isArray(dataNode.screenshots) ? dataNode.screenshots : []
     const videosNode = Array.isArray(dataNode.videos) ? dataNode.videos : []
     const shortDescription = typeof dataNode.shortDescription === 'string'
@@ -522,9 +473,11 @@ export const useGamesApi = () => {
     searchGames,
     searchGameSuggestions,
     getTopGames,
+    getShops,
     getGameIdBySlug,
     getGameInfo,
     getPrices,
+    getPriceHistory,
     getGameMedia
   }
 }
