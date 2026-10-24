@@ -98,6 +98,7 @@
 <script setup lang="ts">
 import type { GameInfo, GameMedia, PriceHistoryPoint, PriceRow } from '~/composables/useGamesApi'
 import { rankOffers } from '~/utils/offers'
+import { buildGameSeoDescription, buildGameSeoTitle, buildProductJsonLd, serializeJsonLd } from '~/utils/seo'
 
 const route = useRoute()
 const toast = useToast()
@@ -238,15 +239,39 @@ const errorMessage = computed(() => {
   return error.value ? 'Não foi possível carregar os dados deste jogo.' : ''
 })
 
+const seoTitle = computed(() => buildGameSeoTitle(gameInfo.value?.title ?? 'Jogo', offers.value))
+const seoDescription = computed(() => buildGameSeoDescription(gameInfo.value?.title ?? 'este jogo', offers.value))
+// Canonical uses the slug being visited: links across the site use the same ITAD slug.
+const canonicalUrl = computed(() => `${runtimeConfig.public.siteUrl}/game/${String(route.params.id ?? '').toLowerCase()}`)
+const ogImage = computed(() => {
+  return sidebarHeaderImage.value === fallbackCover ? `${runtimeConfig.public.siteUrl}/og-default.png` : sidebarHeaderImage.value
+})
+
+useSeoMeta({
+  title: () => `${seoTitle.value} | ${appName.value}`,
+  description: () => seoDescription.value,
+  ogTitle: () => seoTitle.value,
+  ogDescription: () => seoDescription.value,
+  ogImage: () => ogImage.value,
+  ogUrl: () => canonicalUrl.value,
+  ogType: 'website',
+  twitterCard: 'summary_large_image'
+})
+
 useHead({
-  title: computed(() => `${gameInfo.value?.title ?? 'Detalhe do jogo'} | ${appName.value}`),
-  meta: [
-    {
-      name: 'description',
-      content: 'Compare preços por loja e veja o histórico de valores de jogos para PC.'
-    },
-    { property: 'og:title', content: computed(() => gameInfo.value?.title ?? appName.value) }
-  ]
+  link: [{ rel: 'canonical', href: canonicalUrl }],
+  script: computed(() => (gameInfo.value
+    ? [{
+        type: 'application/ld+json',
+        innerHTML: serializeJsonLd(buildProductJsonLd({
+          name: gameInfo.value.title,
+          url: canonicalUrl.value,
+          image: ogImage.value,
+          description: gameDescription.value,
+          offers: offers.value
+        }))
+      }]
+    : []))
 })
 
 watch(

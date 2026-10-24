@@ -113,15 +113,27 @@ const { data: shops } = await useAsyncData('itad-shops', getShops)
 const shopNames = computed(() => new Map((shops.value ?? []).map((shop) => [shop.id, shop.title])))
 const tags = computed(() => activeFilterTags(state.value, shopNames.value))
 
-useHead({
-  title: computed(() => `${collection.value?.title ?? 'Todas as ofertas'} | ${appName.value}`),
-  meta: [
-    {
-      name: 'description',
-      content: computed(() => collection.value?.description ?? 'Todas as promoções de jogos para PC, com filtros por loja, preço e desconto.')
-    }
-  ]
+const pageTitle = computed(() => `${collection.value?.title ?? 'Todas as ofertas'} | ${appName.value}`)
+const pageDescription = computed(() => {
+  return collection.value?.description ?? 'Todas as promoções de jogos para PC nas lojas que vendem no Brasil.'
 })
+// Filtered variants all point to the unfiltered page.
+const canonicalUrl = computed(() => {
+  return `${runtimeConfig.public.siteUrl}${collection.value ? `/ofertas/${collection.value.slug}` : '/ofertas'}`
+})
+
+useSeoMeta({
+  title: () => pageTitle.value,
+  description: () => pageDescription.value,
+  ogTitle: () => pageTitle.value,
+  ogDescription: () => pageDescription.value,
+  ogImage: `${runtimeConfig.public.siteUrl}/og-default.png`,
+  ogUrl: () => canonicalUrl.value,
+  ogType: 'website',
+  twitterCard: 'summary_large_image'
+})
+
+useHead({ link: [{ rel: 'canonical', href: canonicalUrl }] })
 
 // Every change lands on /ofertas (a collection is only a starting preset);
 // push keeps each filter step in history so "voltar" restores it.

@@ -70,6 +70,7 @@ useHead({
   title: computed(() => `Busca por ${queryTerm.value || 'jogos'} | ${appName.value}`),
   meta: [
     { name: 'description', content: 'Busque jogos para PC e compare preços por loja.' },
+    { name: 'robots', content: 'noindex, follow' },
     { property: 'og:title', content: computed(() => `${appName.value} | Busca de jogos`) }
   ]
 })

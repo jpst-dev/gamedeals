@@ -56,12 +56,21 @@ if (typeof route.query.sort === 'string') {
   await navigateTo({ path: '/ofertas', query: ordem ? { ordem } : {} }, { redirectCode: 301 })
 }
 
-useHead({
-  title: computed(() => `${appName.value} | Promoções de jogos para PC`),
-  meta: [
-    { name: 'description', content: 'Os menores preços de jogos para PC em Steam, Epic, GOG e outras lojas, com histórico de preços.' }
-  ]
+const homeTitle = computed(() => `${appName.value} — promoções de jogos para PC no Brasil`)
+const homeDescription = 'Os menores preços de jogos para PC em Steam, Epic, GOG e outras lojas, com histórico de preços.'
+
+useSeoMeta({
+  title: () => homeTitle.value,
+  description: homeDescription,
+  ogTitle: () => homeTitle.value,
+  ogDescription: homeDescription,
+  ogImage: `${runtimeConfig.public.siteUrl}/og-default.png`,
+  ogUrl: `${runtimeConfig.public.siteUrl}/`,
+  ogType: 'website',
+  twitterCard: 'summary_large_image'
 })
+
+useHead({ link: [{ rel: 'canonical', href: `${runtimeConfig.public.siteUrl}/` }] })
 
 const { data: home, pending, error } = await useAsyncData('home', getHome)
 </script>
