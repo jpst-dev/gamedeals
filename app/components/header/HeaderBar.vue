@@ -18,11 +18,12 @@
         Deals<span class="text-green-400">Gamer</span>
       </NuxtLink>
 
-      <div class="hidden max-w-2xl flex-1 sm:block">
+      <!-- Search sits with the favorites/account tools on the right. -->
+      <div class="ml-auto hidden max-w-xl flex-1 sm:block">
         <HeaderSearch ref="searchRef" />
       </div>
 
-      <div class="ml-auto flex items-center gap-1 sm:gap-3">
+      <div class="ml-auto flex items-center gap-1 sm:ml-0 sm:gap-3">
         <button
           type="button"
           class="rounded-md p-1.5 text-gray-300 hover:text-white sm:hidden"
