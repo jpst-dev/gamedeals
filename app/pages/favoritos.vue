@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { buildFavoriteCards } from '~/utils/favorites'
 
-const GRID_CLASS = 'grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+const GRID_CLASS = 'grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6'
 
 useSeoMeta({ title: 'Meus favoritos | DealsGamer', robots: 'noindex' })
 

@@ -30,7 +30,7 @@
 
     <div v-if="pending" class="space-y-4">
       <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-green-400" />
-      <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
         <USkeleton v-for="index in 8" :key="index" class="h-56 rounded-xl" />
       </div>
     </div>
@@ -39,7 +39,7 @@
       Nenhum resultado encontrado para esse termo/filtro.
     </div>
 
-    <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+    <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
       <GameCard
         v-for="game in gamesStore.filteredResults"
         :key="game.id"
