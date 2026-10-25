@@ -1,4 +1,4 @@
-import { DEAL_COLLECTIONS, DEFAULT_CATALOG_STATE, catalogStateToDealParams, type CatalogState } from '../../utils/catalog'
+import { DEAL_COLLECTIONS, DEFAULT_CATALOG_STATE, catalogStateToDealParams, type CatalogState } from '../../app/utils/catalog'
 import { fetchDealsPage, parseDealQuery, type ItadFetcher } from './deals'
 import { itadFetch } from './itad'
 

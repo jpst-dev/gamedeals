@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type { PriceRow } from '../../composables/useGamesApi'
-import { formatBrl } from '../../utils/money'
-import { activationText, rankOffers } from '../../utils/offers'
+import type { PriceRow } from '../../app/composables/useGamesApi'
+import { formatBrl } from '../../app/utils/money'
+import { activationText, rankOffers } from '../../app/utils/offers'
 
 const row = (store: string, price: number, extra: Partial<PriceRow> = {}): PriceRow =>
   ({ store, price, discount: 0, activation: 'Steam', platforms: 'Windows', link: '#', ...extra })

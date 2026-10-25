@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { formatBrl } from '../../utils/money'
-import type { RankedOffer } from '../../utils/offers'
-import { buildGameSeoDescription, buildGameSeoTitle, buildProductJsonLd } from '../../utils/seo'
+import { formatBrl } from '../../app/utils/money'
+import type { RankedOffer } from '../../app/utils/offers'
+import { buildGameSeoDescription, buildGameSeoTitle, buildProductJsonLd } from '../../app/utils/seo'
 
 const offer = (store: string, price: number, url = `https://x/${store}`) =>
   ({ store, price, regularPrice: 199.99, discount: 30, activation: 'Steam', platforms: 'Windows', link: url, isBest: false, deltaFromBest: 0, isHistoryLow: false }) as RankedOffer
@@ -39,7 +39,7 @@ describe('utils/seo', () => {
   })
 
   it('escapes markup-breaking characters when serialized for a script tag', async () => {
-    const { serializeJsonLd } = await import('../../utils/seo')
+    const { serializeJsonLd } = await import('../../app/utils/seo')
     const json = serializeJsonLd({ name: '</script><b>' })
     expect(json).not.toMatch(/[<>]/)
     expect(json).toContain('\\' + 'u003c/script')

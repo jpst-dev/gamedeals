@@ -12,6 +12,14 @@ export default defineNuxtConfig({
     }
   },
   modules: ['@nuxt/ui', '@pinia/nuxt', '@nuxtjs/sitemap'],
+  css: ['~/assets/css/main.css'],
+  // The site is always dark. A dedicated storage key ignores the 'system' or
+  // 'light' value Nuxt UI v2 may have saved under the default key.
+  colorMode: {
+    preference: 'dark',
+    fallback: 'dark',
+    storageKey: 'gamedeals-color-mode'
+  },
   site: {
     url: siteUrl,
     name: 'GameDeals BR'

@@ -20,10 +20,10 @@
       </div>
     </div>
 
-    <!-- pt/-mt leave room for the card's hover lift: an x-scroller also clips y. -->
+    <!-- pt leaves room for the card's hover lift: an x-scroller also clips y. -->
     <div
       ref="trackRef"
-      class="-mx-4 -mt-1.5 flex gap-3 overflow-x-auto px-4 pb-2 pt-1.5 [scrollbar-width:none] sm:mx-0 sm:px-0 md:cursor-grab [&::-webkit-scrollbar]:hidden"
+      class="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 pt-1.5 scrollbar-none sm:mx-0 sm:px-0 md:cursor-grab [&::-webkit-scrollbar]:hidden"
       :class="isDragging ? 'cursor-grabbing select-none' : 'snap-x snap-mandatory'"
       @scroll.passive="updateEdges"
       @pointerdown="onPointerDown"

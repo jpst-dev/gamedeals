@@ -25,7 +25,7 @@
     />
 
     <div v-if="isStale || (pending && loadedGames.length === 0)" :class="GRID_CLASS" aria-busy="true">
-      <div v-for="index in 8" :key="index" class="aspect-[2/3] animate-pulse rounded-xl bg-gray-800/60" />
+      <div v-for="index in 8" :key="index" class="aspect-2/3 animate-pulse rounded-xl bg-gray-800/60" />
     </div>
 
     <div v-else-if="error" class="rounded-lg border border-red-600/30 bg-red-950/40 p-4 text-sm text-red-200">
@@ -65,16 +65,19 @@
       </div>
     </template>
 
-    <button
-      v-if="showBackToTop"
-      type="button"
-      class="fixed bottom-5 right-5 z-40 inline-flex items-center gap-1 rounded-lg bg-[#66c0f4] px-3 py-2 text-sm font-semibold text-gray-950 shadow-lg"
-      aria-label="Voltar ao topo"
-      @click="scrollToTop"
-    >
-      <UIcon name="i-heroicons-arrow-up-20-solid" class="h-4 w-4" />
-      Topo
-    </button>
+    <!-- Teleported: as the last child of this space-y section it would add a gap below the grid. -->
+    <Teleport to="body">
+      <button
+        v-if="showBackToTop"
+        type="button"
+        class="fixed bottom-5 right-5 z-40 inline-flex items-center gap-1 rounded-lg bg-[#66c0f4] px-3 py-2 text-sm font-semibold text-gray-950 shadow-lg"
+        aria-label="Voltar ao topo"
+        @click="scrollToTop"
+      >
+        <UIcon name="i-heroicons-arrow-up-20-solid" class="h-4 w-4" />
+        Topo
+      </button>
+    </Teleport>
   </section>
 </template>
 
@@ -222,7 +225,7 @@ const loadMore = async (mode: 'manual' | 'auto'): Promise<void> => {
       autoLoadedBatches.value += 1
     }
   } catch {
-    toast.add({ title: 'Erro ao carregar mais ofertas', description: 'Tente novamente em instantes.', color: 'red' })
+    toast.add({ title: 'Erro ao carregar mais ofertas', description: 'Tente novamente em instantes.', color: 'error' })
   } finally {
     isLoadingMore.value = false
     isAutoLoading.value = false

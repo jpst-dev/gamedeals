@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCoverFit, hueFromString, steamAsset } from '../../utils/cover'
+import { getCoverFit, hueFromString, steamAsset } from '../../app/utils/cover'
 
 describe('utils/cover', () => {
   it('uses cover when image matches the 2:3 frame within 12%', () => {

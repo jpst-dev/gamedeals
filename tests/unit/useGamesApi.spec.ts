@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { DEFAULT_CATALOG_STATE } from '../../utils/catalog'
+import { DEFAULT_CATALOG_STATE } from '../../app/utils/catalog'
 
 type StateRef<T> = { value: T }
 
@@ -19,7 +19,7 @@ const setupComposableGlobals = (fetchMock: ReturnType<typeof vi.fn>): void => {
 
 const loadModule = async () => {
   vi.resetModules()
-  return await import('../../composables/useGamesApi')
+  return await import('../../app/composables/useGamesApi')
 }
 
 const loadApi = async () => (await loadModule()).useGamesApi()

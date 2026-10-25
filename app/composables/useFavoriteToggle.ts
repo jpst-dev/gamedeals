@@ -10,7 +10,7 @@ export const useFavoriteToggle = () => {
       toast.add({
         title: `Limite de ${MAX_FAVORITES} favoritos atingido`,
         description: 'Remova algum favorito para adicionar outro.',
-        color: 'orange'
+        color: 'warning'
       })
     }
   }

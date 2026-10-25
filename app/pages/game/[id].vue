@@ -1,7 +1,7 @@
 <template>
   <section class="relative isolate space-y-8">
     <div v-if="pending" class="space-y-4">
-      <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-primary-400" />
+      <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-green-400" />
       <USkeleton class="h-60 rounded-xl" />
     </div>
 
@@ -14,10 +14,11 @@
         class="pointer-events-none absolute left-1/2 -top-28 z-0 h-[calc(100%+7rem)] w-screen -translate-x-1/2 overflow-hidden sm:-top-24 sm:h-[calc(100%+6rem)]"
       >
         <div class="absolute inset-0 scale-105 bg-cover bg-center opacity-60 blur-md" :style="heroBackdropStyle" />
-        <div class="absolute inset-0 bg-gradient-to-b from-gray-900/10 via-gray-950/70 to-gray-950" />
+        <div class="absolute inset-0 bg-linear-to-b from-gray-900/10 via-gray-950/70 to-gray-950" />
       </div>
 
-      <div class="relative z-10 space-y-8">
+      <!-- mt-8: Tailwind 3 space-y gave this margin (it follows the absolute backdrop). -->
+      <div class="relative z-10 mt-8 space-y-8">
         <div class="space-y-3">
           <h1 class="text-3xl font-bold text-white">{{ gameInfo?.title }}</h1>
           <div class="grid gap-4 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
@@ -48,7 +49,7 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                  <UBadge v-for="tag in topTags" :key="tag" color="gray" variant="soft">{{ tag }}</UBadge>
+                  <UBadge v-for="tag in topTags" :key="tag" color="neutral" variant="soft">{{ tag }}</UBadge>
                 </div>
               </div>
 
@@ -285,7 +286,7 @@ watch(
       toast.add({
         title: 'Erro ao carregar jogo',
         description: 'Não foi possível carregar detalhes e preços.',
-        color: 'red'
+        color: 'error'
       })
     }
   },

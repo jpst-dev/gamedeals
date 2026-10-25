@@ -9,6 +9,7 @@
 
     <div class="grid gap-3 rounded-xl border border-gray-800 bg-gray-900 p-4 sm:grid-cols-2">
       <UInput
+        class="w-full"
         v-model.number="minPriceModel"
         type="number"
         min="0"
@@ -17,6 +18,7 @@
         aria-label="Preço mínimo"
       />
       <UInput
+        class="w-full"
         v-model.number="maxPriceModel"
         type="number"
         min="0"
@@ -27,7 +29,7 @@
     </div>
 
     <div v-if="pending" class="space-y-4">
-      <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-primary-400" />
+      <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-green-400" />
       <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
         <USkeleton v-for="index in 8" :key="index" class="h-56 rounded-xl" />
       </div>
@@ -89,7 +91,7 @@ const executeSearch = async (): Promise<void> => {
     toast.add({
       title: 'Erro na busca',
       description: 'Não foi possível consultar os jogos.',
-      color: 'red'
+      color: 'error'
     })
     gamesStore.setSearchResults([])
   } finally {

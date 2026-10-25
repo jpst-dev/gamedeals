@@ -25,7 +25,7 @@
           <SwiperSlide
             v-for="(item, index) in props.mediaItems"
             :key="item.key"
-            class="!h-auto max-w-full overflow-hidden"
+            class="h-auto! max-w-full overflow-hidden"
           >
             <template v-if="item.kind === 'video'">
               <video
@@ -59,7 +59,7 @@
                 <img
                   :src="item.url || props.fallbackCover"
                   :alt="item.name || `Screenshot de ${props.gameTitle}`"
-                  class="h-full w-full max-w-full object-cover [transform:scale(1.01)]"
+                  class="h-full w-full max-w-full object-cover transform-[scale(1.01)]"
                 >
               </button>
             </template>
@@ -68,7 +68,7 @@
           <div v-if="props.mediaItems[activeIndex]?.kind !== 'video'" class="absolute bottom-3 right-3 z-20">
             <button
               type="button"
-              class="rounded p-1.5 text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              class="rounded-sm p-1.5 text-white/80 transition hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60"
               aria-label="Abrir modo cinema em tela cheia"
               @click="openLightboxAtCurrent"
             >
@@ -89,8 +89,8 @@
           <SwiperSlide
             v-for="(item, index) in props.mediaItems"
             :key="`thumb-${item.key}`"
-            class="!h-16 !w-28 overflow-hidden rounded-md border transition-all"
-            :class="index === activeIndex ? 'border-primary-400 ring-1 ring-primary-400/70' : 'border-gray-700 hover:border-gray-500'"
+            class="h-16! w-28! overflow-hidden rounded-md border transition-all"
+            :class="index === activeIndex ? 'border-green-400 ring-1 ring-green-400/70' : 'border-gray-700 hover:border-gray-500'"
           >
             <button
               type="button"
@@ -101,7 +101,7 @@
               <img :src="item.thumbnail || item.url || props.fallbackCover" :alt="item.name" class="h-full w-full object-cover">
               <span
                 v-if="item.kind === 'video'"
-                class="absolute bottom-1 right-1 rounded bg-black/75 px-1.5 py-0.5 text-[10px] text-gray-100"
+                class="absolute bottom-1 right-1 rounded-sm bg-black/75 px-1.5 py-0.5 text-[10px] text-gray-100"
               >
                 VIDEO
               </span>

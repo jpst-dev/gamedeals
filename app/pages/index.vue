@@ -1,14 +1,14 @@
 <template>
   <div class="space-y-10">
     <template v-if="pending && !home">
-      <div class="h-64 animate-pulse rounded-2xl bg-gray-800/60 sm:h-80 lg:h-[26rem]" />
+      <div class="h-64 animate-pulse rounded-2xl bg-gray-800/60 sm:h-80 lg:h-104" />
       <div v-for="row in 3" :key="row" class="space-y-3">
-        <div class="h-6 w-48 animate-pulse rounded bg-gray-800/60" />
+        <div class="h-6 w-48 animate-pulse rounded-sm bg-gray-800/60" />
         <div class="flex gap-3 overflow-hidden">
           <div
             v-for="item in 6"
             :key="item"
-            class="aspect-[2/3] w-[42%] shrink-0 animate-pulse rounded-xl bg-gray-800/60 sm:w-[28%] md:w-[22%] lg:w-[16%]"
+            class="aspect-2/3 w-[42%] shrink-0 animate-pulse rounded-xl bg-gray-800/60 sm:w-[28%] md:w-[22%] lg:w-[16%]"
           />
         </div>
       </div>
@@ -21,7 +21,8 @@
 
     <template v-else>
       <h1 class="sr-only">Promoções de jogos para PC no Brasil</h1>
-      <HomeHeroCarousel v-if="home.hero.length > 0" :games="home.hero" />
+      <!-- Tailwind 3 space-y gave the hero this top margin (it follows the sr-only h1). -->
+      <HomeHeroCarousel v-if="home.hero.length > 0" class="mt-10" :games="home.hero" />
       <HomeDealShelf
         v-for="shelf in home.shelves"
         :key="shelf.key"

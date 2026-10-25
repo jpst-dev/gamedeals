@@ -6,7 +6,7 @@ import {
   findCollection,
   parseCatalogQuery,
   type CatalogState
-} from '../../utils/catalog'
+} from '../../app/utils/catalog'
 
 describe('utils/catalog URL state', () => {
   it('parses a malformed query into safe defaults', () => {
@@ -50,7 +50,7 @@ describe('utils/catalog URL state', () => {
 
 describe('DRM options', () => {
   it('offers only the activation filters verified on ITAD', async () => {
-    const { DRM_OPTIONS } = await import('../../utils/catalog')
+    const { DRM_OPTIONS } = await import('../../app/utils/catalog')
     expect(DRM_OPTIONS).toEqual([{ id: 61, label: 'Steam' }, { id: 1000, label: 'Sem DRM' }])
   })
 

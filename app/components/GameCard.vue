@@ -1,17 +1,17 @@
 <template>
   <article
-    class="group relative mx-auto w-full max-w-sm overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-500 hover:shadow-xl hover:shadow-primary-950/40"
+    class="group relative mx-auto w-full max-w-sm overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-green-500 hover:shadow-xl hover:shadow-green-950/40"
     :aria-label="cardLabel"
   >
-    <NuxtLink :to="gameHref" class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
-      <div class="relative w-full overflow-hidden rounded-xl bg-gray-950 [clip-path:inset(0_round_0.75rem)] [contain:paint]">
+    <NuxtLink :to="gameHref" class="block focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-green-400">
+      <div class="relative w-full overflow-hidden rounded-xl bg-gray-950 [clip-path:inset(0_round_0.75rem)] contain-[paint]">
         <GameCover
           :sources="game.images"
           :title="game.title"
-          class="transition-transform duration-500 transform-gpu will-change-transform [backface-visibility:hidden] group-hover:scale-105 group-focus-within:scale-105"
+          class="transition-transform duration-500 transform-gpu will-change-transform backface-hidden group-hover:scale-105 group-focus-within:scale-105"
         />
 
-        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
+        <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/35 to-transparent" />
 
         <div class="absolute left-2 right-11 top-2 flex flex-wrap gap-1.5">
           <span v-if="hasDiscount" class="rounded-full bg-green-600/95 px-2 py-0.5 text-xs font-semibold text-white">
@@ -26,14 +26,14 @@
         </div>
 
         <div class="absolute inset-x-0 bottom-0">
-          <div class="rounded-lg bg-black/72 p-3 shadow-[0_-6px_24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
+          <div class="rounded-lg bg-black/72 p-3 shadow-[0_-6px_24px_rgba(0,0,0,0.45)] backdrop-blur-xs">
             <h2 class="line-clamp-2 min-h-[2.6rem] text-sm font-semibold text-white md:text-base">
               {{ game.title }}
             </h2>
 
             <p v-if="noOffer" class="mt-2 pb-1 text-sm text-gray-300">Sem ofertas no momento</p>
             <div v-else class="mt-2 space-y-1 pb-1">
-              <p class="text-base font-bold text-primary-300">
+              <p class="text-base font-bold text-green-300">
                 {{ formattedLowestPrice }}
               </p>
               <p v-if="hasRegularPrice" class="text-xs text-gray-300 line-through">
@@ -58,7 +58,7 @@
     <!-- Outside the link: a button nested in an anchor is invalid and confuses screen readers. -->
     <button
       type="button"
-      class="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-950/80 backdrop-blur transition-colors hover:bg-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+      class="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-950/80 backdrop-blur-sm transition-colors hover:bg-gray-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-green-400"
       :class="isFavorite ? 'text-rose-400' : 'text-white'"
       :aria-pressed="isFavorite"
       :aria-label="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"

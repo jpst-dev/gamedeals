@@ -3,7 +3,7 @@
     <template v-if="best">
       <div class="flex items-center justify-between gap-2">
         <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Melhor preço agora</p>
-        <span v-if="best.discount > 0" class="rounded bg-green-600 px-1.5 py-0.5 text-xs font-bold text-white">-{{ best.discount }}%</span>
+        <span v-if="best.discount > 0" class="rounded-sm bg-green-600 px-1.5 py-0.5 text-xs font-bold text-white">-{{ best.discount }}%</span>
       </div>
 
       <p class="flex flex-wrap items-baseline gap-2">
@@ -24,7 +24,7 @@
         :href="best.link"
         target="_blank"
         rel="noopener noreferrer nofollow"
-        class="flex w-full items-center justify-center rounded-lg bg-[#66c0f4] px-4 py-2.5 text-sm font-bold text-gray-950 transition-colors hover:bg-sky-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        class="flex w-full items-center justify-center rounded-lg bg-[#66c0f4] px-4 py-2.5 text-sm font-bold text-gray-950 transition-colors hover:bg-sky-300 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white"
       >
         Comprar na {{ best.store }} ↗
       </a>

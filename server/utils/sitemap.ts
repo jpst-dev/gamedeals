@@ -1,4 +1,4 @@
-import { DEAL_COLLECTIONS } from '../../utils/catalog'
+import { DEAL_COLLECTIONS } from '../../app/utils/catalog'
 import { fetchDealsPage, parseDealQuery, type ItadFetcher } from './deals'
 import { itadFetch } from './itad'
 
