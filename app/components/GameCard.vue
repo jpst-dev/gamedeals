@@ -36,12 +36,15 @@
               <p class="text-base font-bold text-green-300">
                 {{ formattedLowestPrice }}
               </p>
-              <p v-if="hasRegularPrice" class="text-xs text-gray-300 line-through">
-                {{ formattedRegularPrice }}
-              </p>
-              <p v-if="offerValidityLabel" class="text-xs font-medium text-yellow-300">
-                {{ offerValidityLabel }}
-              </p>
+              <!-- Expiry shares the old price's line so cards keep the same height. -->
+              <div v-if="hasRegularPrice || offerValidityLabel" class="flex items-baseline justify-between gap-2 text-xs">
+                <p v-if="hasRegularPrice" class="text-gray-300 line-through">
+                  {{ formattedRegularPrice }}
+                </p>
+                <p v-if="offerValidityLabel" class="ml-auto shrink-0 font-medium text-yellow-300">
+                  {{ offerValidityLabel }}
+                </p>
+              </div>
             </div>
 
             <div
