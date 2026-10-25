@@ -48,6 +48,16 @@ export const useGamesStore = defineStore('games', () => {
     return next.result
   }
 
+  // The signed-in account is the source of truth: its list replaces the browser copy.
+  const replaceFavorites = (items: FavoriteGame[]): void => {
+    favorites.value = items
+  }
+
+  const clearFavorites = (): void => {
+    favorites.value = []
+    legacyFavoriteIds.value = []
+  }
+
   const migrateLegacyFavorites = async (getInfo: (gameId: string) => Promise<GameInfo>): Promise<void> => {
     if (legacyFavoriteIds.value.length === 0) {
       return
@@ -106,10 +116,12 @@ export const useGamesStore = defineStore('games', () => {
     // Browser-only state: never take it from the SSR payload.
     favorites: skipHydrate(favorites),
     legacyFavoriteIds: skipHydrate(legacyFavoriteIds),
+    clearFavorites,
     isFavorite,
     loadFavorites,
     migrateLegacyFavorites,
     priceFilter,
+    replaceFavorites,
     searchResults,
     filteredResults,
     setSearchResults,

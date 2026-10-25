@@ -5,6 +5,9 @@ export default defineEventHandler((event) => {
     'User-agent: *',
     'Disallow: /favoritos',
     'Disallow: /api/',
+    'Disallow: /conta',
+    'Disallow: /entrar',
+    'Disallow: /alertas/',
     `Sitemap: ${siteUrl}/sitemap.xml`,
     ''
   ].join('\n')

@@ -2,6 +2,16 @@
   <section class="space-y-4">
     <h1 class="text-2xl font-bold text-white sm:text-3xl">Meus favoritos</h1>
 
+    <div
+      v-if="accountsEnabled && !loggedIn"
+      class="flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-900/40 p-4 text-sm text-gray-300 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>Receba um email quando seus favoritos entrarem em promoção.</p>
+      <NuxtLink to="/entrar" class="inline-flex shrink-0 justify-center rounded-lg bg-[#66c0f4] px-4 py-2 font-bold text-gray-950 hover:bg-sky-300">
+        Entrar
+      </NuxtLink>
+    </div>
+
     <ClientOnly>
       <div v-if="gamesStore.favorites.length === 0" class="space-y-3 rounded-xl border border-gray-800 p-6 text-sm text-gray-300">
         <p>Você ainda não favoritou nenhum jogo. Toque no ♥ de um jogo para salvá-lo aqui.</p>
@@ -43,6 +53,7 @@ useSeoMeta({ title: 'Meus favoritos | GameDeals BR', robots: 'noindex' })
 
 const gamesStore = useGamesStore()
 const toggleFavorite = useFavoriteToggle()
+const { enabled: accountsEnabled, loggedIn } = useAccount()
 const { getBestPrices } = useGamesApi()
 
 // Unfavoriting just hides a card; only newly added ids (e.g. legacy

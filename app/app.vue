@@ -34,6 +34,14 @@
                     </span>
                   </ClientOnly>
                 </NuxtLink>
+                <template v-if="accountsEnabled">
+                  <NuxtLink v-if="loggedIn" to="/conta" class="text-gray-300 transition-colors hover:text-white" active-class="text-white!">
+                    Minha conta
+                  </NuxtLink>
+                  <NuxtLink v-else to="/entrar" class="text-gray-300 transition-colors hover:text-white" active-class="text-white!">
+                    Entrar
+                  </NuxtLink>
+                </template>
               </nav>
             </div>
 
@@ -103,6 +111,9 @@
         <footer class="border-t border-gray-800 py-4 text-center text-sm text-gray-400">
           <UContainer>
             <p>Dados de preço fornecidos por IsThereAnyDeal.</p>
+            <p v-if="accountsEnabled" class="mt-1">
+              <NuxtLink to="/privacidade" class="hover:text-white">Privacidade</NuxtLink>
+            </p>
           </UContainer>
         </footer>
       </div>
@@ -119,10 +130,15 @@ const toast = useToast()
 const { searchGameSuggestions, getGameInfo } = useGamesApi()
 const gamesStore = useGamesStore()
 const favoritesCount = computed(() => gamesStore.favorites.length)
+const { enabled: accountsEnabled, loggedIn, refreshFavorites } = useAccount()
 
 onMounted(() => {
   gamesStore.loadFavorites()
   void gamesStore.migrateLegacyFavorites(getGameInfo)
+  if (accountsEnabled && loggedIn.value) {
+    // Picks up changes made on other devices; offline it keeps the local copy.
+    refreshFavorites().catch(() => {})
+  }
 })
 const runtimeConfig = useRuntimeConfig()
 const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
