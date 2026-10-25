@@ -26,7 +26,7 @@ export default defineNuxtConfig({
   },
   sitemap: {
     sources: ['/api/__sitemap__/urls'],
-    exclude: ['/favoritos', '/search/**']
+    exclude: ['/favoritos', '/search/**', '/entrar/**', '/conta', '/alertas/**', '/privacidade']
   },
   icon: {
     serverBundle: {
