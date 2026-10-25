@@ -62,10 +62,12 @@ export default defineNuxtConfig({
   },
   nitro: {
     vercel: {
-      // The daily alerts job needs more than the old 10 s default; 60 s is
-      // the Hobby plan's ceiling without Fluid compute.
       functions: {
-        maxDuration: 60
+        // The daily alerts job needs more than the old 10 s default; 60 s is
+        // the Hobby plan's ceiling without Fluid compute.
+        maxDuration: 60,
+        // São Paulo, next to the Neon database (sa-east-1) and the visitors.
+        regions: ['gru1']
       }
     }
   },
