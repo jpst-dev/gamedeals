@@ -11,6 +11,6 @@ export default defineCachedEventHandler(async (event) => {
   name: 'itad-suggest',
   getKey: (event) => {
     const query = getQuery(event)
-    return `${normalizeSearchTerm(query.q)}:${limitOf(query.limit)}`
+    return suggestCacheKey(query.q, limitOf(query.limit))
   }
 })

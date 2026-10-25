@@ -43,6 +43,17 @@ describe('createSuggestionLoader', () => {
     await expect(old).resolves.toBeNull()
   })
 
+  it('falha de termo antigo não apaga a lista atual', async () => {
+    const slow = deferred<Suggestion[]>()
+    const loader = createSuggestionLoader((term) => term === 'cy' ? slow.promise : Promise.resolve([item('Cyberpunk 2077')]))
+
+    const old = loader.load('cy')
+    await expect(loader.load('cyber')).resolves.toEqual([item('Cyberpunk 2077')])
+    slow.resolve(Promise.reject(new Error('429')) as unknown as Suggestion[])
+
+    await expect(old).resolves.toBeNull()
+  })
+
   it('menos de 2 letras não busca', async () => {
     const fetch = vi.fn(async () => [item('x')])
     await expect(createSuggestionLoader(fetch).load('c')).resolves.toEqual([])

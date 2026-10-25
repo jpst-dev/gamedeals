@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { normalizeSearchTerm } from '../../app/utils/search'
-import { buildSuggestions } from '../../server/utils/suggest'
+import { buildSuggestions, suggestCacheKey } from '../../server/utils/suggest'
 import type { ItadFetcher } from '../../server/utils/deals'
 
 const GAME_A = '018d937f-0000-7000-8000-00000000000a'
@@ -80,5 +80,21 @@ describe('buildSuggestions', () => {
     const { fetcher, calls } = fakeItad(() => [])
     await buildSuggestions('game', 3, fetcher)
     expect(calls[0]?.options?.params?.results).toBe(3)
+  })
+})
+
+describe('suggestCacheKey', () => {
+  // Nitro strips every non-word character from custom cache keys.
+  const stored = (key: string): string => key.replace(/\W/g, '')
+
+  it('buscas diferentes não dividem a mesma entrada de cache', () => {
+    const keys = [suggestCacheKey('halo 2', 8), suggestCacheKey('halo2', 8), suggestCacheKey('原神', 8), suggestCacheKey('ведьмак', 8), suggestCacheKey('pokémon', 8), suggestCacheKey('pokmon', 8)]
+    expect(new Set(keys.map(stored)).size).toBe(keys.length)
+    expect(keys.every((key) => stored(key) === key)).toBe(true)
+  })
+
+  it('mesmo termo escrito diferente usa a mesma entrada', () => {
+    expect(suggestCacheKey('  Halo   2 ', 8)).toBe(suggestCacheKey('halo 2', 8))
+    expect(suggestCacheKey('halo', 8)).not.toBe(suggestCacheKey('halo', 5))
   })
 })

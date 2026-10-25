@@ -1,5 +1,5 @@
 <template>
-  <div ref="rootRef" class="relative w-full">
+  <div ref="rootRef" class="relative w-full" @focusout="handleFocusOut">
     <form role="search" @submit.prevent="submit()">
       <label :for="inputId" class="sr-only">Buscar jogo pelo nome</label>
       <div
@@ -26,7 +26,7 @@
           @keydown.down.prevent="move(1)"
           @keydown.up.prevent="move(-1)"
           @keydown.enter="handleEnter"
-          @keydown.esc.prevent="close(true)"
+          @keydown.esc.prevent="handleEscape"
         >
         <button
           v-if="fullscreen"
@@ -63,6 +63,7 @@
           :key="entry"
           type="button"
           role="option"
+          tabindex="-1"
           :aria-selected="index === highlighted"
           class="flex w-full items-center gap-3 px-3 py-2 text-left text-sm text-gray-200"
           :class="index === highlighted ? 'bg-gray-800' : 'hover:bg-gray-800/60'"
@@ -96,6 +97,7 @@
             :key="suggestion.id"
             :to="`/game/${suggestion.slug}`"
             role="option"
+            tabindex="-1"
             :aria-selected="index === highlighted"
             class="flex items-center gap-3 border-b border-gray-800/70 px-3 py-2"
             :class="index === highlighted ? 'bg-gray-800' : 'hover:bg-gray-800/60'"
@@ -143,6 +145,7 @@
           :id="optionId(suggestions.length)"
           :to="searchLink"
           role="option"
+          tabindex="-1"
           :aria-selected="highlighted === suggestions.length"
           class="block px-3 py-2.5 text-sm font-medium text-green-400"
           :class="highlighted === suggestions.length ? 'bg-gray-800' : 'hover:bg-gray-800/60'"
@@ -192,6 +195,24 @@ watch(suggestions, () => {
 watch(() => route.query.q, (value) => {
   setTerm(typeof value === 'string' ? value : '')
 }, { immediate: true })
+
+// Esc closes the list and keeps focus in the box; on the phone it also
+// closes the full-screen search.
+const handleEscape = (): void => {
+  if (props.fullscreen) {
+    close(true)
+    return
+  }
+  close()
+}
+
+// Tabbing away (or focus moving anywhere outside) closes the list.
+const handleFocusOut = (event: FocusEvent): void => {
+  const next = event.relatedTarget as Node | null
+  if (!next || !rootRef.value?.contains(next)) {
+    close()
+  }
+}
 
 const handleFocus = (): void => {
   focused.value = true

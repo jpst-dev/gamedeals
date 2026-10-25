@@ -1,3 +1,4 @@
+import { normalizeSearchTerm } from '../../app/utils/search'
 import type { Suggestion } from '../../shared/types/suggest'
 import { pickBestPrice } from './alerts'
 import type { ItadFetcher } from './deals'
@@ -58,4 +59,11 @@ export const buildSuggestions = async (term: string, limit: number, fetcher: Ita
   }
 
   return items.map((item) => ({ ...item, price: prices.get(item.id) ?? null }))
+}
+
+// Nitro keeps only \w characters of a custom cache key, so "halo 2" and
+// "halo2" (or any two non-Latin terms) would share an entry. Hex keeps
+// every normalized term distinct.
+export const suggestCacheKey = (raw: unknown, limit: number): string => {
+  return `${Buffer.from(normalizeSearchTerm(raw), 'utf8').toString('hex')}_${limit}`
 }

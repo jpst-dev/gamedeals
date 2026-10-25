@@ -32,7 +32,16 @@ export const createSuggestionLoader = (fetch: (term: string) => Promise<Suggesti
     if (cached) {
       return cached
     }
-    const list = await fetch(term)
+    let list: SuggestionList
+    try {
+      list = await fetch(term)
+    } catch (error) {
+      // An old term failing late must not wipe the list of the current one.
+      if (request === latest) {
+        throw error
+      }
+      return null
+    }
     cache.set(term, list)
     return request === latest ? list : null
   }
