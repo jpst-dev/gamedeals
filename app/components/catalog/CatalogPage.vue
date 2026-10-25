@@ -65,16 +65,19 @@
       </div>
     </template>
 
-    <button
-      v-if="showBackToTop"
-      type="button"
-      class="fixed bottom-5 right-5 z-40 inline-flex items-center gap-1 rounded-lg bg-[#66c0f4] px-3 py-2 text-sm font-semibold text-gray-950 shadow-lg"
-      aria-label="Voltar ao topo"
-      @click="scrollToTop"
-    >
-      <UIcon name="i-heroicons-arrow-up-20-solid" class="h-4 w-4" />
-      Topo
-    </button>
+    <!-- Teleported: as the last child of this space-y section it would add a gap below the grid. -->
+    <Teleport to="body">
+      <button
+        v-if="showBackToTop"
+        type="button"
+        class="fixed bottom-5 right-5 z-40 inline-flex items-center gap-1 rounded-lg bg-[#66c0f4] px-3 py-2 text-sm font-semibold text-gray-950 shadow-lg"
+        aria-label="Voltar ao topo"
+        @click="scrollToTop"
+      >
+        <UIcon name="i-heroicons-arrow-up-20-solid" class="h-4 w-4" />
+        Topo
+      </button>
+    </Teleport>
   </section>
 </template>
 
