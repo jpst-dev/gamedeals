@@ -1,4 +1,4 @@
-# GameDeals BR
+# DealsGamer
 
 Comparador de ofertas de jogos para PC, com dados da [IsThereAnyDeal](https://docs.isthereanydeal.com/), focado em boa UX e baixo consumo de API.
 

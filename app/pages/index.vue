@@ -40,7 +40,7 @@ const gamesStore = useGamesStore()
 const toggleFavorite = useFavoriteToggle()
 const { getHome } = useGamesApi()
 const runtimeConfig = useRuntimeConfig()
-const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
+const appName = computed(() => runtimeConfig.public.appName || 'DealsGamer')
 
 // The old home was the catalog; keep its shared links working.
 const LEGACY_SORTS: Record<string, string> = {

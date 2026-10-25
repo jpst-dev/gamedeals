@@ -141,7 +141,7 @@ onMounted(() => {
   }
 })
 const runtimeConfig = useRuntimeConfig()
-const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
+const appName = computed(() => runtimeConfig.public.appName || 'DealsGamer')
 
 const searchValue = ref('')
 const suggestions = ref<GameSuggestion[]>([])

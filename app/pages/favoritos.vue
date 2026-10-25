@@ -49,7 +49,7 @@ import { buildFavoriteCards } from '~/utils/favorites'
 
 const GRID_CLASS = 'grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
 
-useSeoMeta({ title: 'Meus favoritos | GameDeals BR', robots: 'noindex' })
+useSeoMeta({ title: 'Meus favoritos | DealsGamer', robots: 'noindex' })
 
 const gamesStore = useGamesStore()
 const toggleFavorite = useFavoriteToggle()

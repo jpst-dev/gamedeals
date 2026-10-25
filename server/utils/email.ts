@@ -39,7 +39,7 @@ const layout = (content: string, footer: string): string => `<!doctype html>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#030712;">
 <tr><td align="center" style="padding:24px 12px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:Arial,Helvetica,sans-serif;color:#e5e7eb;">
-<tr><td style="padding:0 0 20px;font-size:20px;font-weight:bold;color:#ffffff;">GameDeals <span style="color:#4ade80;">BR</span></td></tr>
+<tr><td style="padding:0 0 20px;font-size:20px;font-weight:bold;color:#ffffff;">Deals<span style="color:#4ade80;">Gamer</span></td></tr>
 ${content}
 <tr><td style="padding:24px 0 0;font-size:12px;line-height:18px;color:#6b7280;">${footer}</td></tr>
 </table>
@@ -52,11 +52,11 @@ const button = (href: string, label: string): string => {
 }
 
 export const renderLoginEmail = (input: { link: string; siteUrl: string }): Omit<EmailMessage, 'to'> => {
-  const subject = 'Seu link para entrar no GameDeals BR'
+  const subject = 'Seu link para entrar no DealsGamer'
   const alertsNote = 'Ao entrar, os alertas de promoção dos seus favoritos vêm ligados. Você pode desligar quando quiser em Minha conta.'
   const html = layout(`
 <tr><td style="font-size:16px;line-height:24px;padding:0 0 16px;">Clique no botão para entrar. O link vale por 15 minutos e só pode ser usado uma vez.</td></tr>
-<tr><td style="padding:0 0 16px;">${button(input.link, 'Entrar no GameDeals BR')}</td></tr>
+<tr><td style="padding:0 0 16px;">${button(input.link, 'Entrar no DealsGamer')}</td></tr>
 <tr><td style="font-size:13px;line-height:20px;color:#9ca3af;padding:0 0 8px;">Se o botão não funcionar, copie este endereço: <span style="word-break:break-all;color:#66c0f4;">${escapeHtml(input.link)}</span></td></tr>
 <tr><td style="font-size:13px;line-height:20px;color:#9ca3af;">${escapeHtml(alertsNote)}</td></tr>`,
   `Se você não pediu este link, ignore este email. ${escapeHtml(input.siteUrl)}`)
@@ -107,7 +107,7 @@ ${button(gameUrl(game), 'Ver ofertas')}
   const html = layout(`
 <tr><td style="font-size:16px;line-height:24px;padding:0 0 16px;">${input.games.length === 1 ? 'Um jogo dos seus favoritos entrou em promoção:' : 'Jogos dos seus favoritos entraram em promoção:'}</td></tr>
 ${rows}`,
-  `Você recebe este email porque ativou os alertas de promoção no GameDeals BR. Preços da IsThereAnyDeal, sujeitos a mudança.<br>
+  `Você recebe este email porque ativou os alertas de promoção no DealsGamer. Preços da IsThereAnyDeal, sujeitos a mudança.<br>
 <a href="${escapeHtml(input.unsubscribeUrl)}" style="color:#9ca3af;">Parar de receber estes emails</a>`)
 
   const text = [

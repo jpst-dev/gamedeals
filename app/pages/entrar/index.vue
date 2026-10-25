@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 requireAccountsPage()
-useSeoMeta({ title: 'Entrar | GameDeals BR', robots: 'noindex' })
+useSeoMeta({ title: 'Entrar | DealsGamer', robots: 'noindex' })
 
 const { loggedIn } = useAccount()
 if (loggedIn.value) {
