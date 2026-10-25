@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 requireAccountsPage()
-useSeoMeta({ title: 'Alertas de promoção | GameDeals BR', robots: 'noindex' })
+useSeoMeta({ title: 'Alertas de promoção | DealsGamer', robots: 'noindex' })
 
 const route = useRoute()
 const state = ref<'loading' | 'done' | 'invalid'>('loading')

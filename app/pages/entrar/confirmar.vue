@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 requireAccountsPage()
-useSeoMeta({ title: 'Entrar | GameDeals BR', robots: 'noindex' })
+useSeoMeta({ title: 'Entrar | DealsGamer', robots: 'noindex' })
 
 const route = useRoute()
 const toast = useToast()

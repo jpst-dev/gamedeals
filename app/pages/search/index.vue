@@ -58,7 +58,7 @@ const gamesStore = useGamesStore()
 const toggleFavorite = useFavoriteToggle()
 const { searchGames } = useGamesApi()
 const runtimeConfig = useRuntimeConfig()
-const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
+const appName = computed(() => runtimeConfig.public.appName || 'DealsGamer')
 
 const minPriceModel = ref<number | undefined>(undefined)
 const maxPriceModel = ref<number | undefined>(undefined)

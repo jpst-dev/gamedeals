@@ -48,7 +48,7 @@ describe('renderLoginEmail', () => {
   it('traz o link, a validade e o aviso dos alertas', () => {
     const link = `${siteUrl}/entrar/confirmar?token=abc`
     const email = renderLoginEmail({ link, siteUrl })
-    expect(email.subject).toBe('Seu link para entrar no GameDeals BR')
+    expect(email.subject).toBe('Seu link para entrar no DealsGamer')
     for (const body of [email.html, email.text]) {
       expect(body).toContain(link)
       expect(body).toContain('15 minutos')

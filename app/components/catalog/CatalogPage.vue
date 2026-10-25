@@ -107,7 +107,7 @@ const gamesStore = useGamesStore()
 const toggleFavorite = useFavoriteToggle()
 const { getDealsPage, getShops } = useGamesApi()
 const runtimeConfig = useRuntimeConfig()
-const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
+const appName = computed(() => runtimeConfig.public.appName || 'DealsGamer')
 
 const collection = computed(() => (props.collectionSlug ? findCollection(props.collectionSlug) : undefined))
 const state = computed(() => parseCatalogQuery(route.query, props.preset))

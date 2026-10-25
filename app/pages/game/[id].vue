@@ -106,7 +106,7 @@ const route = useRoute()
 const toast = useToast()
 const { getGameInfo, getPrices, getPriceHistory, getGameIdBySlug, getGameMedia } = useGamesApi()
 const runtimeConfig = useRuntimeConfig()
-const appName = computed(() => runtimeConfig.public.appName || 'GameDeals BR')
+const appName = computed(() => runtimeConfig.public.appName || 'DealsGamer')
 const fallbackCover = 'https://placehold.co/600x300/111827/e5e7eb?text=No+Image'
 
 const gameId = computed(() => {

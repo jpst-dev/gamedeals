@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 requireAccountsPage()
-useSeoMeta({ title: 'Minha conta | GameDeals BR', robots: 'noindex' })
+useSeoMeta({ title: 'Minha conta | DealsGamer', robots: 'noindex' })
 
 const toast = useToast()
 const gamesStore = useGamesStore()

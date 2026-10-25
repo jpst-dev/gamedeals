@@ -43,5 +43,5 @@
 
 <script setup lang="ts">
 requireAccountsPage()
-useSeoMeta({ title: 'Privacidade | GameDeals BR', description: 'O que o GameDeals BR guarda sobre você e como excluir.' })
+useSeoMeta({ title: 'Privacidade | DealsGamer', description: 'O que o DealsGamer guarda sobre você e como excluir.' })
 </script>
