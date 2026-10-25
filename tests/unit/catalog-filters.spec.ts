@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { priceDraftOf, priceFromDraft, priceLabel, shopsToShow, togglePrice } from '../../app/utils/catalog-filters'
+import { priceDraftOf, priceUpdateFor, priceFromDraft, priceLabel, shopsToShow, togglePrice } from '../../app/utils/catalog-filters'
 
 const shop = (id: number, title: string) => ({ id, title })
 const steam = shop(61, 'Steam')
@@ -39,5 +39,13 @@ describe('catalog-filters', () => {
     expect(shown).toHaveLength(7)
     expect(shown[0]?.id).toBe(9)
     expect(shopsToShow([steam, epic, nuuvem], [70], 'steam', false)).toEqual([nuuvem, steam])
+  })
+
+  it('preço acima do limite vindo da URL não é apagado pelo controle', () => {
+    expect(priceUpdateFor(300, 500)).toBeNull()
+    expect(priceUpdateFor(300, undefined)).toBeNull()
+    expect(priceUpdateFor(300, 20)).toEqual({ preco: undefined })
+    expect(priceUpdateFor(60, 500)).toEqual({ preco: 60 })
+    expect(priceUpdateFor(60, 60)).toBeNull()
   })
 })

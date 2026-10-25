@@ -52,6 +52,13 @@ export const priceLabel = (draft: number): string => {
   return draft === 0 ? 'Grátis' : `Até R$ ${draft}`
 }
 
+// What a resting slider should change, or null when it already shows the
+// current filter (a URL price above the slider's range sits at its top, and
+// must not be read as "no limit").
+export const priceUpdateFor = (draft: number, current: number | undefined): { preco: number | undefined } | null => {
+  return draft === priceDraftOf(current) ? null : { preco: priceFromDraft(draft) }
+}
+
 // Clicking the shortcut that is already on turns the price filter off.
 export const togglePrice = (current: number | undefined, value: number): number | undefined => {
   return current === value ? undefined : value

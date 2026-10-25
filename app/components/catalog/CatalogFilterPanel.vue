@@ -175,11 +175,11 @@ watch(priceDraft, (value) => {
   if (priceTimer) {
     clearTimeout(priceTimer)
   }
-  const preco = priceFromDraft(value)
-  if (preco === props.state.preco) {
+  const update = priceUpdateFor(value, props.state.preco)
+  if (!update) {
     return
   }
-  priceTimer = setTimeout(() => emit('update', { preco }), PRICE_DEBOUNCE_MS)
+  priceTimer = setTimeout(() => emit('update', update), PRICE_DEBOUNCE_MS)
 })
 
 onBeforeUnmount(() => {
