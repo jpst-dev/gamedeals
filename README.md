@@ -7,7 +7,7 @@ Comparador de ofertas de jogos para PC, com dados da [IsThereAnyDeal](https://do
 - Home estilo loja: destaque com arte da Steam e prateleiras temáticas.
 - Catálogo `/ofertas` com atalhos, filtros compactos (estado na URL) e coleções (`/ofertas/gratis`, `/ofertas/acabando`...).
 - Carregamento incremental com auto-load + botão manual `Carregar mais`.
-- Busca global com autocomplete (dropdown) e navegação direta para detalhe.
+- Busca global com sugestões que já mostram capa, preço, desconto e menor preço da história; buscas recentes e atalhos `/` e `Ctrl+K`.
 - Página do jogo com caixa de compra, lista de lojas ordenada por preço e histórico visual.
 - URL amigável por slug (`/game/cyberpunk-2077`).
 - Favoritos em `/favoritos` com o melhor preço atual (até 50, salvos no navegador).
@@ -75,7 +75,8 @@ yarn preview
 
 ## Arquitetura rápida
 
-- `app.vue`: shell global (header, busca/autocomplete, footer)
+- `app.vue`: shell global (cabeçalho, conteúdo, rodapé)
+- `components/header/`: cabeçalho em duas faixas (`HeaderBar`), busca (`HeaderSearch`) e menu do celular (`HeaderMobileMenu`)
 - `pages/index.vue`: home (destaque + prateleiras de `/api/home`); links antigos `/?sort=` redirecionam para `/ofertas`
 - `pages/ofertas/index.vue`, `pages/ofertas/[colecao].vue`: catálogo e coleções (`components/catalog/**`, estado em `utils/catalog.ts`)
 - `pages/favoritos.vue`: favoritos com preço atual (`utils/favorites.ts`)
@@ -87,7 +88,7 @@ yarn preview
 - `server/utils/home.ts` + `server/api/home.get.ts`: destaque e prateleiras da home (cache de 5 min)
 - `server/api/shops.get.ts`: lojas
 - `server/api/__sitemap__/urls.get.ts`, `server/routes/robots.txt.ts`: URLs dinâmicas do sitemap (`@nuxtjs/sitemap`) e robots
-- `server/api/games/**`: busca, lookup por slug, info, preços e histórico de um jogo
+- `server/api/games/**`: busca, sugestões com preço (`suggest`, cache de 5 min por termo), lookup por slug, info, preços e histórico de um jogo
 - `server/api/steam/[appid].get.ts`: screenshots/trailers da Steam
 - `stores/games.ts`: estado global (favoritos/filtros)
 

@@ -11,7 +11,7 @@
 
     <template v-else>
       <div
-        class="pointer-events-none absolute left-1/2 -top-28 z-0 h-[calc(100%+7rem)] w-screen -translate-x-1/2 overflow-hidden sm:-top-24 sm:h-[calc(100%+6rem)]"
+        class="pointer-events-none absolute left-1/2 -top-20 z-0 h-[calc(100%+5rem)] w-screen -translate-x-1/2 overflow-hidden sm:-top-32 sm:h-[calc(100%+8rem)]"
       >
         <div class="absolute inset-0 scale-105 bg-cover bg-center opacity-60 blur-md" :style="heroBackdropStyle" />
         <div class="absolute inset-0 bg-linear-to-b from-gray-900/10 via-gray-950/70 to-gray-950" />
@@ -61,7 +61,7 @@
         <GameShopOfferList :offers="offers" />
 
         <div class="grid gap-6 lg:grid-cols-2">
-          <div id="historico" class="scroll-mt-28 space-y-3">
+          <div id="historico" class="scroll-mt-32 space-y-3">
             <h2 class="text-xl font-semibold text-white">Histórico de preços</h2>
             <PriceHistoryChart
               :history="priceHistory"
