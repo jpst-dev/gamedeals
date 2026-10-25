@@ -1,69 +1,90 @@
 <template>
-  <section class="space-y-4">
-    <header class="space-y-1">
-      <h1 class="text-2xl font-bold text-white sm:text-3xl">{{ collection?.title ?? 'Todas as ofertas' }}</h1>
-      <p v-if="collection" class="text-sm text-gray-400">{{ collection.description }}</p>
-    </header>
-
-    <CatalogQuickFilterBar
-      :state="state"
-      :active-count="tags.length"
-      @update="applyPatch"
-      @open-filters="openFilters"
-    />
-
-    <CatalogActiveFilterTags :tags="tags" @remove="applyPatch" @clear="clearFilters" />
-
-    <CatalogFilterPopover
-      :state="state"
-      :shops="shops ?? []"
-      :open="filtersOpen"
-      :anchor="filtersAnchor"
-      @update="applyPatch"
-      @close="filtersOpen = false"
-      @clear="clearFilters"
-    />
-
-    <div v-if="isStale || (pending && loadedGames.length === 0)" :class="GRID_CLASS" aria-busy="true">
-      <div v-for="index in 8" :key="index" class="aspect-2/3 animate-pulse rounded-xl bg-gray-800/60" />
-    </div>
-
-    <div v-else-if="error" class="rounded-lg border border-red-600/30 bg-red-950/40 p-4 text-sm text-red-200">
-      Não foi possível carregar as ofertas agora. Tente novamente em instantes.
-    </div>
-
-    <div v-else-if="loadedGames.length === 0" class="flex flex-col items-start gap-3 rounded-lg border border-gray-700 p-4 text-sm text-gray-300">
-      Nenhuma oferta com esses filtros.
-      <button type="button" class="rounded-lg border border-gray-600 px-3 py-1.5 text-gray-100 hover:border-gray-400" @click="clearFilters">
-        Limpar filtros
-      </button>
-    </div>
-
-    <template v-else>
-      <div :class="GRID_CLASS">
-        <GameCard
-          v-for="game in loadedGames"
-          :key="game.id"
-          :game="game"
-          :is-favorite="gamesStore.isFavorite(game.id)"
-          @toggle-favorite="toggleFavorite"
-        />
+  <section class="lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-6">
+    <aside class="hidden lg:block" aria-label="Filtros">
+      <div class="custom-scrollbar sticky top-[122px] max-h-[calc(100vh-138px)] overflow-y-auto rounded-xl border border-gray-800 bg-gray-900/40 p-4">
+        <CatalogFilterPanel :state="state" :shops="shops ?? []" :active-count="tags.length" @update="applyPatch" @clear="clearFilters" />
       </div>
+    </aside>
 
-      <div class="flex flex-col items-center gap-2 pt-2">
-        <div v-if="hasMore && canAutoLoadMore" ref="autoLoadTrigger" class="h-2 w-full" aria-hidden="true" />
-        <p v-if="isAutoLoading" class="text-xs text-[#66c0f4]">Carregando automaticamente...</p>
+    <div class="min-w-0 space-y-4">
+      <header class="space-y-1">
+        <h1 class="text-2xl font-bold text-white sm:text-3xl">{{ collection?.title ?? 'Todas as ofertas' }}</h1>
+        <p v-if="collection" class="text-sm text-gray-400">{{ collection.description }}</p>
+      </header>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="min-w-0 flex-1">
+          <CatalogActiveFilterTags :tags="tags" @remove="applyPatch" @clear="clearFilters" />
+        </div>
         <button
           type="button"
-          class="rounded-lg border border-gray-600 px-4 py-2 text-sm text-gray-100 transition-colors hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="isLoadingMore || !hasMore"
-          aria-label="Carregar mais ofertas"
-          @click="loadMore('manual')"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-gray-700 px-3 py-1.5 text-sm text-gray-200 hover:border-gray-500 lg:hidden"
+          @click="filtersOpen = true"
         >
-          {{ isLoadingMore ? 'Carregando...' : hasMore ? 'Carregar mais' : 'Todas as ofertas carregadas' }}
+          <UIcon name="i-heroicons-adjustments-horizontal" class="h-4 w-4" aria-hidden="true" />
+          Filtros<template v-if="tags.length > 0"> ({{ tags.length }})</template>
+        </button>
+        <label class="flex shrink-0 items-center gap-2 text-xs text-gray-400">
+          <span class="hidden sm:inline">Ordenar por</span>
+          <select
+            :value="state.ordem"
+            class="rounded-lg border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-gray-100 focus:border-[#66c0f4] focus:outline-hidden"
+            aria-label="Ordenar ofertas"
+            @change="applyPatch({ ordem: ($event.target as HTMLSelectElement).value as CatalogOrder })"
+          >
+            <option v-for="option in ORDER_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
+          </select>
+        </label>
+      </div>
+
+      <USlideover v-model:open="filtersOpen" side="left" title="Filtros" :ui="{ content: 'max-w-xs' }">
+        <template #body>
+          <CatalogFilterPanel hide-heading :state="state" :shops="shops ?? []" :active-count="tags.length" @update="applyPatch" @clear="clearFilters" />
+        </template>
+      </USlideover>
+
+      <div v-if="isStale || (pending && loadedGames.length === 0)" :class="GRID_CLASS" aria-busy="true">
+        <div v-for="index in 8" :key="index" class="aspect-2/3 animate-pulse rounded-xl bg-gray-800/60" />
+      </div>
+
+      <div v-else-if="error" class="rounded-lg border border-red-600/30 bg-red-950/40 p-4 text-sm text-red-200">
+        Não foi possível carregar as ofertas agora. Tente novamente em instantes.
+      </div>
+
+      <div v-else-if="loadedGames.length === 0" class="flex flex-col items-start gap-3 rounded-lg border border-gray-700 p-4 text-sm text-gray-300">
+        Nenhuma oferta com esses filtros.
+        <button type="button" class="rounded-lg border border-gray-600 px-3 py-1.5 text-gray-100 hover:border-gray-400" @click="clearFilters">
+          Limpar filtros
         </button>
       </div>
-    </template>
+
+      <template v-else>
+        <div :class="GRID_CLASS">
+          <GameCard
+            v-for="game in loadedGames"
+            :key="game.id"
+            :game="game"
+            :is-favorite="gamesStore.isFavorite(game.id)"
+            @toggle-favorite="toggleFavorite"
+          />
+        </div>
+
+        <div class="flex flex-col items-center gap-2 pt-2">
+          <div v-if="hasMore && canAutoLoadMore" ref="autoLoadTrigger" class="h-2 w-full" aria-hidden="true" />
+          <p v-if="isAutoLoading" class="text-xs text-[#66c0f4]">Carregando automaticamente...</p>
+          <button
+            type="button"
+            class="rounded-lg border border-gray-600 px-4 py-2 text-sm text-gray-100 transition-colors hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-50"
+            :disabled="isLoadingMore || !hasMore"
+            aria-label="Carregar mais ofertas"
+            @click="loadMore('manual')"
+          >
+            {{ isLoadingMore ? 'Carregando...' : hasMore ? 'Carregar mais' : 'Todas as ofertas carregadas' }}
+          </button>
+        </div>
+      </template>
+
+    </div>
 
     <!-- Teleported: as the last child of this space-y section it would add a gap below the grid. -->
     <Teleport to="body">
@@ -88,6 +109,7 @@ import {
   catalogStateToQuery,
   findCollection,
   parseCatalogQuery,
+  type CatalogOrder,
   type CatalogState
 } from '~/utils/catalog'
 
@@ -96,7 +118,7 @@ const props = defineProps<{
   collectionSlug?: string
 }>()
 
-const GRID_CLASS = 'grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+const GRID_CLASS = 'grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
 const MAX_AUTO_LOAD_BATCHES = 3
 const AUTO_LOAD_COOLDOWN_MS = 800
 
@@ -152,16 +174,11 @@ const applyPatch = (patch: Partial<CatalogState>): void => {
 }
 
 const clearFilters = (): void => {
-  filtersOpen.value = false
   void router.push({ path: '/ofertas' })
 }
 
+// Phone/tablet panel; it stays open while filtering so several can be picked.
 const filtersOpen = ref(false)
-const filtersAnchor = ref<HTMLElement | null>(null)
-const openFilters = (anchor: HTMLElement | null): void => {
-  filtersAnchor.value = anchor
-  filtersOpen.value = true
-}
 
 const { data, pending, error } = await useAsyncData(
   () => `catalog:${JSON.stringify(state.value)}`,

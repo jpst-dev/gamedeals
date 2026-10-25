@@ -5,7 +5,7 @@ Comparador de ofertas de jogos para PC, com dados da [IsThereAnyDeal](https://do
 ## Features do MVP
 
 - Home estilo loja: destaque com arte da Steam e prateleiras temáticas.
-- Catálogo `/ofertas` com atalhos, filtros compactos (estado na URL) e coleções (`/ofertas/gratis`, `/ofertas/acabando`...).
+- Catálogo `/ofertas` com filtros sempre visíveis na lateral (painel lateral no celular), aplicados na hora com estado na URL, e coleções (`/ofertas/gratis`, `/ofertas/acabando`...).
 - Carregamento incremental com auto-load + botão manual `Carregar mais`.
 - Busca global com sugestões que já mostram capa, preço, desconto e menor preço da história; buscas recentes e atalhos `/` e `Ctrl+K`.
 - Página do jogo com caixa de compra, lista de lojas ordenada por preço e histórico visual.
@@ -78,7 +78,7 @@ yarn preview
 - `app.vue`: shell global (cabeçalho, conteúdo, rodapé)
 - `components/header/`: cabeçalho em duas faixas (`HeaderBar`), busca (`HeaderSearch`) e menu do celular (`HeaderMobileMenu`)
 - `pages/index.vue`: home (destaque + prateleiras de `/api/home`); links antigos `/?sort=` redirecionam para `/ofertas`
-- `pages/ofertas/index.vue`, `pages/ofertas/[colecao].vue`: catálogo e coleções (`components/catalog/**`, estado em `utils/catalog.ts`)
+- `pages/ofertas/index.vue`, `pages/ofertas/[colecao].vue`: catálogo e coleções (`components/catalog/**`, estado em `utils/catalog.ts`, regras do painel de filtros em `utils/catalog-filters.ts`)
 - `pages/favoritos.vue`: favoritos com preço atual (`utils/favorites.ts`)
 - `pages/search/index.vue`: resultados de busca
 - `pages/game/[id].vue`: detalhe do jogo (`components/game/**`, ranking de ofertas em `utils/offers.ts`, SEO em `utils/seo.ts`)
@@ -108,5 +108,4 @@ yarn preview
 ## Próximos passos sugeridos
 
 - CI no GitHub Actions (`yarn lint` + `yarn build`).
-- Refinar filtro mobile com animação lateral.
 - Adicionar analytics básico de busca/cliques.

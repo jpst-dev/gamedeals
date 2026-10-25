@@ -16,3 +16,9 @@
     cursor: pointer;
   }
 }
+
+/* Site width: Nuxt UI's UContainer reads this (default 80rem). Unlayered so
+   it wins over the library's own :root value. */
+:root {
+  --ui-container: 100rem;
+}

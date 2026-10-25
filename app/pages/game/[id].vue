@@ -1,5 +1,5 @@
 <template>
-  <section class="relative isolate space-y-8">
+  <section class="relative isolate mx-auto max-w-7xl space-y-8">
     <div v-if="pending" class="space-y-4">
       <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin text-green-400" />
       <USkeleton class="h-60 rounded-xl" />
