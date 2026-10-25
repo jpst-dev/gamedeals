@@ -1,5 +1,5 @@
 <template>
-  <section id="ofertas" class="scroll-mt-28 space-y-3" aria-labelledby="ofertas-title">
+  <section id="ofertas" class="scroll-mt-32 space-y-3" aria-labelledby="ofertas-title">
     <h2 id="ofertas-title" class="text-xl font-semibold text-white">Onde comprar</h2>
 
     <p v-if="offers.length === 0" class="rounded-xl border border-white/10 bg-gray-900/45 p-4 text-sm text-gray-400">

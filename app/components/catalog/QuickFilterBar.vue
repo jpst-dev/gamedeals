@@ -1,5 +1,5 @@
 <template>
-  <div class="sticky top-[105px] z-30 -mx-4 border-b border-gray-800 bg-gray-950/90 px-4 py-2 backdrop-blur-sm sm:top-[65px] sm:mx-0 sm:px-0">
+  <div class="sticky top-[57px] z-30 -mx-4 border-b border-gray-800 bg-gray-950/90 px-4 py-2 backdrop-blur-sm sm:top-[106px] sm:mx-0 sm:px-0">
     <div class="flex items-center gap-3">
       <div class="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-0.5 scrollbar-none [&::-webkit-scrollbar]:hidden">
         <button

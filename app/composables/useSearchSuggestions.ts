@@ -15,6 +15,8 @@ export const useSearchSuggestions = () => {
   const term = ref('')
   const suggestions = ref<Suggestion[]>([])
   const loading = ref(false)
+  // Term whose suggestions are on screen (or on the way).
+  let shownFor = ''
   const recent = ref<string[]>([])
   const loader = createSuggestionLoader((q) => $fetch<Suggestion[]>('/api/games/suggest', { query: { q, limit: 8 } }))
   let timer: ReturnType<typeof setTimeout> | null = null
@@ -34,6 +36,7 @@ export const useSearchSuggestions = () => {
 
   const onInput = (value: string): void => {
     term.value = value
+    shownFor = normalizeSearchTerm(value)
     if (timer) {
       clearTimeout(timer)
     }
@@ -48,6 +51,14 @@ export const useSearchSuggestions = () => {
 
   const setTerm = (value: string): void => {
     term.value = value
+  }
+
+  // A term put in the box by setTerm (from the URL) loads only when the
+  // person comes back to the box.
+  const ensureLoaded = (): void => {
+    if (normalizeSearchTerm(term.value) !== shownFor) {
+      onInput(term.value)
+    }
   }
 
   const remember = (value: string): void => {
@@ -70,5 +81,5 @@ export const useSearchSuggestions = () => {
     }
   })
 
-  return { term, suggestions, loading, recent, onInput, setTerm, remember, clearRecent }
+  return { term, suggestions, loading, recent, onInput, setTerm, ensureLoaded, remember, clearRecent }
 }
