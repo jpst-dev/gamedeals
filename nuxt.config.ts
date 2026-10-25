@@ -11,7 +11,7 @@ export default defineNuxtConfig({
       ]
     }
   },
-  modules: ['@nuxt/ui', '@pinia/nuxt', '@nuxtjs/sitemap'],
+  modules: ['@nuxt/ui', '@pinia/nuxt', '@nuxtjs/sitemap', 'nuxt-auth-utils'],
   css: ['~/assets/css/main.css'],
   // The site is always dark. A dedicated storage key ignores the 'system' or
   // 'light' value Nuxt UI v2 may have saved under the default key.
@@ -35,9 +35,19 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     itadApiKey: process.env.ITAD_API_KEY || '',
+    databaseUrl: process.env.DATABASE_URL || '',
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    emailFrom: process.env.EMAIL_FROM || 'GameDeals BR <onboarding@resend.dev>',
+    cronSecret: process.env.CRON_SECRET || '',
+    session: {
+      password: process.env.NUXT_SESSION_PASSWORD || '',
+      maxAge: 60 * 60 * 24 * 30
+    },
     public: {
       appName: 'GameDeals BR',
-      siteUrl
+      siteUrl,
+      // Accounts and alerts stay hidden until the own domain exists.
+      accountsEnabled: process.env.NUXT_PUBLIC_ACCOUNTS_ENABLED === 'true'
     }
   },
   typescript: {
