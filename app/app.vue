@@ -130,14 +130,14 @@ const toast = useToast()
 const { searchGameSuggestions, getGameInfo } = useGamesApi()
 const gamesStore = useGamesStore()
 const favoritesCount = computed(() => gamesStore.favorites.length)
-const { enabled: accountsEnabled, loggedIn, syncAfterLogin } = useAccount()
+const { enabled: accountsEnabled, loggedIn, refreshFavorites } = useAccount()
 
 onMounted(() => {
   gamesStore.loadFavorites()
   void gamesStore.migrateLegacyFavorites(getGameInfo)
   if (accountsEnabled && loggedIn.value) {
     // Picks up changes made on other devices; offline it keeps the local copy.
-    syncAfterLogin().catch(() => {})
+    refreshFavorites().catch(() => {})
   }
 })
 const runtimeConfig = useRuntimeConfig()

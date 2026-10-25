@@ -19,3 +19,14 @@ describe('contas escondidas por padrão', () => {
     expect(readFileSync('nuxt.config.ts', 'utf8')).toContain("accountsEnabled: process.env.NUXT_PUBLIC_ACCOUNTS_ENABLED === 'true'")
   })
 })
+
+describe('carregar o site logado', () => {
+  // A merge on every load would bring back, from a device still signed in,
+  // a favorite removed on another one. Merge only right after sign-in.
+  it('busca a lista da conta em vez de juntar com a do navegador', () => {
+    const app = readFileSync('app/app.vue', 'utf8')
+    const mounted = app.slice(app.indexOf('onMounted('), app.indexOf('})', app.indexOf('onMounted(')))
+    expect(mounted).toContain('refreshFavorites()')
+    expect(mounted).not.toContain('syncAfterLogin')
+  })
+})

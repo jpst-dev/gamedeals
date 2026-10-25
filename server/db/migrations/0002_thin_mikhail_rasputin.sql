@@ -1,0 +1,1 @@
+ALTER TABLE "login_tokens" ADD COLUMN "rate_key" text NOT NULL;

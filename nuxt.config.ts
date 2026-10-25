@@ -60,6 +60,15 @@ export default defineNuxtConfig({
       }
     }
   },
+  nitro: {
+    vercel: {
+      // The daily alerts job needs more than the old 10 s default; 60 s is
+      // the Hobby plan's ceiling without Fluid compute.
+      functions: {
+        maxDuration: 60
+      }
+    }
+  },
   experimental: {
     appManifest: false
   }

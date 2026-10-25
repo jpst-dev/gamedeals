@@ -9,6 +9,7 @@ import {
   mergeBrowserFavorites,
   mergeFavoriteLists,
   parseFavoriteGame,
+  parseFavoriteList,
   removeFavorite,
   unsubscribeWithSignature
 } from '../../server/utils/account'
@@ -123,5 +124,14 @@ describe('parseFavoriteGame', () => {
     expect(parseFavoriteGame({ id: 'x', slug: 's', title: 'T', image: '' }, now)).toBeNull()
     expect(parseFavoriteGame({ id, title: 'T', image: '' }, now)).toBeNull()
     expect(parseFavoriteGame('lixo', now)).toBeNull()
+  })
+})
+
+describe('parseFavoriteList', () => {
+  it('descarta itens inválidos em vez de recusar a lista toda', () => {
+    const now = new Date('2026-10-25T12:00:00Z')
+    const id = '018d9386-46b0-70e5-9b53-b1ca00522c36'
+    const list = parseFavoriteList([{ id, slug: 's', title: 'T', image: '' }, { id, slug: '', title: '', image: '' }, 'lixo'], now)
+    expect(list.map((item) => item.id)).toEqual([id])
   })
 })

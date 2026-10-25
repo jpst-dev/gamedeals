@@ -1,7 +1,7 @@
-import { MAX_FAVORITES, type FavoriteGame } from '../../../app/utils/favorites'
+import { MAX_FAVORITES } from '../../../app/utils/favorites'
 
-// Called after every sign-in with the browser's favorites; returns the
-// account's final list.
+// Called right after each sign-in with the browser's favorites; returns the
+// account's final list. Invalid entries are skipped, not fatal.
 export default defineEventHandler(async (event) => {
   requireAccountsEnabled(event)
   const { user } = await requireUserSession(event)
@@ -9,10 +9,5 @@ export default defineEventHandler(async (event) => {
   if (!Array.isArray(body?.items) || body.items.length > MAX_FAVORITES) {
     throw createError({ statusCode: 400, statusMessage: `items must be a list of up to ${MAX_FAVORITES}` })
   }
-  const now = new Date()
-  const items = body.items.map((raw) => parseFavoriteGame(raw, now))
-  if (items.some((item) => item === null)) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid favorite' })
-  }
-  return mergeBrowserFavorites(await useDb(), user.id, items as FavoriteGame[])
+  return mergeBrowserFavorites(await useDb(), user.id, parseFavoriteList(body.items, new Date()))
 })

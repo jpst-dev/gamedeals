@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   const db = await useDb()
   const now = new Date()
   const result = await requestLoginLink(db, { email, ip: getRequestIP(event, { xForwardedFor: true }) ?? 'unknown', now })
-  if (!('token' in result) || await countEmailsToday(db, now) >= EMAIL_DAILY_LIMIT) {
+  if (!('token' in result) || !await canSendLoginEmail(db, now)) {
     return { ok: true }
   }
 

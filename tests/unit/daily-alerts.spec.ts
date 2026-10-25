@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
-import { emailSends, favorites, priceSnapshots, users } from '../../server/db/schema'
+import { emailSends, favorites, loginTokens, priceSnapshots, users } from '../../server/db/schema'
 import { addFavorite } from '../../server/utils/account'
 import { findOrCreateUser } from '../../server/utils/auth'
 import { runDailyAlerts, type FetchPrices } from '../../server/utils/daily-alerts'
@@ -156,5 +156,53 @@ describe('runDailyAlerts', () => {
       'List-Unsubscribe': `<${urls.oneClick}>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
     })
+  })
+})
+
+describe('limpeza diária', () => {
+  it('a tarefa apaga pedidos de link com mais de um dia', async () => {
+    const { db, run } = await setup()
+    await db.insert(loginTokens).values({ tokenHash: 'h', email: 'x@y.com', rateKey: 'x@y.com', ipHash: 'i', expiresAt: day(1), createdAt: day(1) })
+    await run({ g1: { price: 100, cut: 0 } }, day(3))
+    expect(await db.select().from(loginTokens)).toHaveLength(0)
+  })
+})
+
+describe('no máximo um email por pessoa por dia', () => {
+  it('outra execução no mesmo dia com preço menor não manda de novo', async () => {
+    const { sent, run } = await setup()
+    await run({ g1: { price: 100, cut: 0 } }, day(1))
+    await run({ g1: { price: 40, cut: 60 } }, day(2))
+    await run({ g1: { price: 30, cut: 70 } }, new Date(day(2).getTime() + 3_600_000))
+    expect(sent).toHaveLength(1)
+    await run({ g1: { price: 30, cut: 70 } }, day(3))
+    expect(sent).toHaveLength(2)
+  })
+
+  it('duas execuções ao mesmo tempo mandam um email só', async () => {
+    const { sent, run } = await setup()
+    await run({ g1: { price: 100, cut: 0 } }, day(1))
+    await Promise.all([run({ g1: { price: 40, cut: 60 } }, day(2)), run({ g1: { price: 40, cut: 60 } }, day(2))])
+    expect(sent).toHaveLength(1)
+  })
+})
+
+describe('volume', () => {
+  it('a primeira execução com 10 pessoas e 30 favoritos cada usa poucas consultas', async () => {
+    let queries = 0
+    const db = await createTestDb(() => { queries += 1 })
+    const games = Array.from({ length: 30 }, (_, index) => `g${index}`)
+    for (let person = 0; person < 10; person += 1) {
+      const user = await findOrCreateUser(db, `p${person}@mail.com`)
+      for (const id of games) {
+        await addFavorite(db, user.id, { id, slug: id, title: id, image: '' })
+      }
+    }
+    const prices = Object.fromEntries(games.map((id) => [id, { price: 40, cut: 60 }]))
+    queries = 0
+    await runDailyAlerts({ db, fetchPrices: fakeItad(prices), sendEmail: async () => {}, now: day(1), siteUrl, secret })
+    expect(queries).toBeLessThan(60)
+    const rows = await db.select().from(favorites)
+    expect(rows.every((row) => row.notifiedPrice === 40 && !row.baselinePending)).toBe(true)
   })
 })

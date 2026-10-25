@@ -1,6 +1,6 @@
 import { and, asc, count, eq } from 'drizzle-orm'
 import { MAX_FAVORITES, type FavoriteGame, type FavoriteInput } from '../../app/utils/favorites'
-import { favorites, users } from '../db/schema'
+import { favorites, loginTokens, users } from '../db/schema'
 import type { Db } from './db'
 import { isGameId } from './itad'
 import { verifyUnsubscribe } from './unsubscribe'
@@ -64,9 +64,13 @@ export const setAlertsEnabled = async (db: Db, userId: string, enabled: boolean)
   await db.update(users).set({ alertsEnabled: enabled }).where(eq(users.id, userId))
 }
 
-// Favorites go with it (on delete cascade).
+// Favorites go with it (on delete cascade); pending sign-in requests for the
+// same email too, so the address leaves the database.
 export const deleteUser = async (db: Db, userId: string): Promise<void> => {
-  await db.delete(users).where(eq(users.id, userId))
+  const [deleted] = await db.delete(users).where(eq(users.id, userId)).returning({ email: users.email })
+  if (deleted) {
+    await db.delete(loginTokens).where(eq(loginTokens.email, deleted.email))
+  }
 }
 
 export const unsubscribeWithSignature = async (db: Db, userId: string, sig: string, secret: string): Promise<boolean> => {
@@ -92,4 +96,13 @@ export const parseFavoriteGame = (raw: unknown, now: Date): FavoriteGame | null 
   }
   const addedAt = typeof item.addedAt === 'string' && !Number.isNaN(Date.parse(item.addedAt)) ? new Date(item.addedAt) : now
   return { id: item.id, slug, title, image, addedAt: addedAt.toISOString() }
+}
+
+// Old browser entries can miss a slug or title: skip them so the rest of the
+// list still reaches the account.
+export const parseFavoriteList = (raw: unknown[], now: Date): FavoriteGame[] => {
+  return raw.flatMap((item) => {
+    const game = parseFavoriteGame(item, now)
+    return game ? [game] : []
+  })
 }

@@ -1,4 +1,4 @@
-import { and, count, gte, lt } from 'drizzle-orm'
+import { and, count, eq, gte, lt } from 'drizzle-orm'
 import { emailSends } from '../db/schema'
 import type { BestPrice } from './alerts'
 import type { Db } from './db'
@@ -164,4 +164,16 @@ export const countEmailsToday = async (db: Db, now: Date): Promise<number> => {
 
 export const recordEmail = async (db: Db, kind: 'login' | 'alert', now: Date = new Date()): Promise<void> => {
   await db.insert(emailSends).values({ kind, sentAt: now })
+}
+
+// Sign-in emails stop at 60 a day so a flood of requests can't use up the
+// alerts' share; they never pass the provider's total either.
+export const LOGIN_DAILY_CAP = 60
+
+export const canSendLoginEmail = async (db: Db, now: Date): Promise<boolean> => {
+  const start = startOfUtcDay(now)
+  const end = new Date(start.getTime() + 86_400_000)
+  const today = and(gte(emailSends.sentAt, start), lt(emailSends.sentAt, end))
+  const [logins] = await db.select({ total: count() }).from(emailSends).where(and(today, eq(emailSends.kind, 'login')))
+  return (logins?.total ?? 0) < LOGIN_DAILY_CAP && await countEmailsToday(db, now) < EMAIL_DAILY_LIMIT
 }

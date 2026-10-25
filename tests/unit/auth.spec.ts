@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { loginTokens } from '../../server/db/schema'
-import { consumeLoginToken, findOrCreateUser, normalizeEmail, requestLoginLink } from '../../server/utils/auth'
+import { emailSends, loginTokens } from '../../server/db/schema'
+import { canSendLoginEmail, recordEmail } from '../../server/utils/email'
+import { deleteUser } from '../../server/utils/account'
+import { consumeLoginToken, findOrCreateUser, normalizeEmail, pruneLoginTokens, requestLoginLink } from '../../server/utils/auth'
 import { createTestDb } from './helpers/test-db'
 
 const now = new Date('2026-10-25T12:00:00Z')
@@ -95,5 +97,63 @@ describe('findOrCreateUser', () => {
     const second = await findOrCreateUser(db, 'joao@mail.com')
     expect(first.created).toBe(true)
     expect(second).toEqual({ id: first.id, email: 'joao@mail.com', created: false })
+  })
+})
+
+describe('emails dos pedidos de link não ficam para sempre', () => {
+  it('excluir a conta apaga os pedidos de link daquele email', async () => {
+    const db = await createTestDb()
+    await requestLoginLink(db, { email: 'joao@mail.com', ip: '1.1.1.1', now })
+    await requestLoginLink(db, { email: 'outro@mail.com', ip: '1.1.1.1', now })
+    const user = await findOrCreateUser(db, 'joao@mail.com')
+    await deleteUser(db, user.id)
+    expect((await db.select().from(loginTokens)).map((row) => row.email)).toEqual(['outro@mail.com'])
+  })
+
+  it('pedidos com mais de um dia são apagados', async () => {
+    const db = await createTestDb()
+    await requestLoginLink(db, { email: 'velho@mail.com', ip: '1.1.1.1', now })
+    await requestLoginLink(db, { email: 'novo@mail.com', ip: '1.1.1.1', now: later(86_400_000) })
+    await pruneLoginTokens(db, later(86_400_000 + 60_000))
+    expect((await db.select().from(loginTokens)).map((row) => row.email)).toEqual(['novo@mail.com'])
+  })
+})
+
+describe('cota de emails protegida', () => {
+  it('pedidos em paralelo respeitam o limite por email', async () => {
+    const db = await createTestDb()
+    const results = await Promise.all(Array.from({ length: 10 }, (_, index) => requestLoginLink(db, { email: 'joao@mail.com', ip: `9.9.9.${index}`, now })))
+    expect(results.filter((result) => 'token' in result)).toHaveLength(3)
+  })
+
+  it('variações com +tag e pontos do Gmail contam como o mesmo email', async () => {
+    const db = await createTestDb()
+    for (const [index, email] of ['joao+1@gmail.com', 'jo.ao@gmail.com', 'joao+x@googlemail.com'].entries()) {
+      expect(await requestLoginLink(db, { email, ip: `8.8.8.${index}`, now })).toHaveProperty('token')
+    }
+    expect(await requestLoginLink(db, { email: 'joao@gmail.com', ip: '8.8.8.9', now })).toEqual({ limited: true })
+  })
+
+  it('no máximo 20 pedidos por IP por dia', async () => {
+    const db = await createTestDb()
+    for (let index = 0; index < 20; index += 1) {
+      const at = later(Math.floor(index / 10) * 16 * 60_000)
+      expect(await requestLoginLink(db, { email: `p${index}@mail.com`, ip: '7.7.7.7', now: at })).toHaveProperty('token')
+    }
+    expect(await requestLoginLink(db, { email: 'p99@mail.com', ip: '7.7.7.7', now: later(40 * 60_000) })).toEqual({ limited: true })
+  })
+
+  it('emails de login param em 60 por dia, deixando espaço para os alertas', async () => {
+    const db = await createTestDb()
+    await db.insert(emailSends).values(Array.from({ length: 59 }, () => ({ kind: 'login' as const, sentAt: now })))
+    expect(await canSendLoginEmail(db, now)).toBe(true)
+    await recordEmail(db, 'login', now)
+    expect(await canSendLoginEmail(db, now)).toBe(false)
+  })
+
+  it('e nunca passam do limite total do dia', async () => {
+    const db = await createTestDb()
+    await db.insert(emailSends).values(Array.from({ length: 100 }, () => ({ kind: 'alert' as const, sentAt: now })))
+    expect(await canSendLoginEmail(db, now)).toBe(false)
   })
 })

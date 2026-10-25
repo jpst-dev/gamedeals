@@ -13,7 +13,7 @@ export const useAccount = () => {
 
   const email = computed(() => user.value?.email ?? null)
 
-  // After every sign-in (and on load while signed in): the browser's
+  // Right after each sign-in: the browser's
   // favorites join the account's, and the browser shows the result.
   const syncAfterLogin = async (): Promise<void> => {
     const merged = await $fetch<FavoriteGame[]>('/api/favorites/merge', {
@@ -21,6 +21,13 @@ export const useAccount = () => {
       body: { items: gamesStore.favorites }
     })
     gamesStore.replaceFavorites(merged)
+  }
+
+  // On load while signed in: the account's list replaces the browser copy.
+  // No merge here, or a game removed on one device would come back from
+  // another device that is still signed in.
+  const refreshFavorites = async (): Promise<void> => {
+    gamesStore.replaceFavorites(await $fetch<FavoriteGame[]>('/api/favorites'))
   }
 
   // Signing out clears the browser copy, so a game removed on one device
@@ -32,7 +39,7 @@ export const useAccount = () => {
     await navigateTo('/')
   }
 
-  return { enabled, loggedIn, email, fetchSession, logout, syncAfterLogin }
+  return { enabled, loggedIn, email, fetchSession, logout, refreshFavorites, syncAfterLogin }
 }
 
 // Account pages don't exist while accounts are hidden.

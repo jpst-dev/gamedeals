@@ -8,6 +8,8 @@ export const users = pgTable('users', {
   // Always stored normalized (trimmed, lower case).
   email: text('email').notNull().unique(),
   alertsEnabled: boolean('alerts_enabled').notNull().default(true),
+  // Day (UTC) of the last alert email: at most one per person per day.
+  lastAlertDay: date('last_alert_day'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 })
 
@@ -15,6 +17,8 @@ export const users = pgTable('users', {
 export const loginTokens = pgTable('login_tokens', {
   tokenHash: text('token_hash').primaryKey(),
   email: text('email').notNull(),
+  // Email with +tags (and Gmail dots) removed: what the rate limits count.
+  rateKey: text('rate_key').notNull(),
   ipHash: text('ip_hash').notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   usedAt: timestamp('used_at', { withTimezone: true }),
